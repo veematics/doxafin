@@ -16,7 +16,7 @@
         "postcss": "^8.4.31",
         "sass": "^1.86.0",
         "tailwindcss": "^3.1.0",
-        "vite": "^6.0.11"
+        "vite": "^6.2.4"
     },
     "dependencies": {
         "@coreui/coreui-pro": "^5.9.0",
