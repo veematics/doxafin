@@ -2,3 +2,20 @@
     transition: max-width 0.3s ease;
 
 }
+
+/* Date Filter Styles */
+.date-filter .modal-dialog {
+    max-width: 800px;
+}
+
+.date-filter .flatpickr-calendar {
+    margin: 10px 0;
+}
+
+.date-filter .btn-group {
+    display: flex;
+}
+
+.date-filter .btn-group label {
+    flex: 1;
+}

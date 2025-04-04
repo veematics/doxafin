@@ -13,7 +13,38 @@
 
         <!-- Scripts -->
         @vite(['resources/sass/app.scss', 'resources/css/custom.css', 'resources/js/app.js'])
+        <script>
+            // Theme initialization
+            document.addEventListener('DOMContentLoaded', function() {
+                const storedTheme = localStorage.getItem('theme') || 'auto';
+                setTheme(storedTheme);
 
+                // Theme switcher event handlers
+                document.querySelectorAll('[data-coreui-theme-value]').forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const theme = toggle.getAttribute('data-coreui-theme-value');
+                        setTheme(theme);
+                        localStorage.setItem('theme', theme);
+                    });
+                });
+
+                function setTheme(theme) {
+                    if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        document.documentElement.setAttribute('data-coreui-theme', 'dark');
+                    } else {
+                        document.documentElement.setAttribute('data-coreui-theme', theme);
+                    }
+                }
+
+                // Listen for system theme changes when in auto mode
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    const storedTheme = localStorage.getItem('theme') || 'auto';
+                    if (storedTheme === 'auto') {
+                        setTheme('auto');
+                    }
+                });
+            });
+        </script>
     </head>
     <body>
        
