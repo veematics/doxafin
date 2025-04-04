@@ -1,6 +1,6 @@
 const initSidebarHandler = () => {
     const sidebar = document.getElementById('sidebar');
-    const dashboard = document.querySelector('.app-dashboard');
+    const dashboard = document.querySelector('.app-width');
 
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -14,7 +14,7 @@ const initSidebarHandler = () => {
                         dashboard.style.maxWidth = '90%';
                     } else {
                         dashboard.classList.add('px-4');
-                        dashboard.style.removeProperty('max-width');
+                        dashboard.style.maxWidth = '';
                     }
                 });
             }

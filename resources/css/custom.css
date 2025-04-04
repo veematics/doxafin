@@ -1,0 +1,4 @@
+.app-width {
+    transition: max-width 0.3s ease;
+
+}
