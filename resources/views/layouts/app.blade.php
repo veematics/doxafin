@@ -62,7 +62,7 @@
         <button class="btn-close d-lg-none" type="button" data-coreui-theme="dark" aria-label="Close" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
       </div>
       <ul class="sidebar-nav" data-coreui="navigation" data-simplebar>
-        <li class="nav-item"><a class="nav-link" href="index.html">
+        <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">
             <svg class="nav-icon">
               <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-speedometer"></use>
             </svg><span data-coreui-i18n="dashboard">Dashboard</span></a></li>
@@ -447,7 +447,9 @@
               <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
             </li>
             <li class="nav-item dropdown"><a class="nav-link py-0" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                <div class="avatar avatar-md"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div></a>
+                <div class="avatar avatar-md">
+                  <img  class="avatar-img" src="{{ auth()->user()->avatar ? asset('images/avatars/' . auth()->user()->avatar) : asset('images/avatars/avatar-default.svg') }}" />
+                  </div></a>
               <div class="dropdown-menu dropdown-menu-end pt-0">
                 <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold rounded-top mb-2" data-coreui-i18n="account">Account</div><a class="dropdown-item" href="#">
                   <svg class="icon me-2">
@@ -471,7 +473,8 @@
                   </svg><span data-coreui-i18n="settings">Settings</span></a><a class="dropdown-item" href="#">
                   <svg class="icon me-2">
                     <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-credit-card"></use>
-                  </svg><span data-coreui-i18n="payments">Payments</span><span class="badge badge-sm bg-secondary-gradient text-dark ms-2">42</span></a><a class="dropdown-item" href="#">
+                  </svg><span data-coreui-i18n="payments">Payments</span><span class="badge badge-sm bg-secondary-gradient text-dark ms-2">42</span></a>
+                  <a class="dropdown-item" href="#">
                   <svg class="icon me-2">
                     <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-file"></use>
                   </svg><span data-coreui-i18n="projects">Projects</span><span class="badge badge-sm bg-primary-gradient ms-2">42</span></a>
@@ -485,8 +488,11 @@
                     @csrf
                     <button type="submit" id="logout-button" class="btn btn-link" style="color: var(--cui-dropdown-link-color);padding: 0px;    margin: 0px;    position: relative;    left: -5px;    text-decoration: none;"><span data-coreui-i18n="logout">Logout</span></button>
                   </form></a>
-                
-                
+                  <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold my-2" data-coreui-i18n="superadmin">Super Admin</div>
+                  <a class="dropdown-item"  href="{{ route('appsetting.users.index') }}">
+                    <svg class="icon me-2">
+                      <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
+                    </svg><span data-coreui-i18n="usermanagement">User Management</span></a>
               </div>
             </li>
           </ul>
@@ -510,6 +516,9 @@
         <div>Doxadigital 2025 </div>
 
       </footer>
+      @stack('scripts')
+          <!-- Add this before closing body tag -->
+    <script src="{{ asset('js/toast-notification.js') }}"></script>
     </div>
     </body>
 </html>

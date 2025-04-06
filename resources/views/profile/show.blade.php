@@ -72,7 +72,7 @@
                 <div class="card">
                     <div class="card-header">Profile Picture</div>
                     <div class="card-body text-center">
-                        <img src="{{ auth()->user()->avatar ? asset('storage/images/avatars/' . auth()->user()->avatar) : asset('images/avatars/avatar-default.svg') }}" 
+                        <img src="{{ auth()->user()->avatar ? asset('images/avatars/' . auth()->user()->avatar) : asset('images/avatars/avatar-default.svg') }}" 
                              class="rounded-circle mb-3" 
                              style="width: 150px; height: 150px; object-fit: cover;" 
                              alt="Profile Picture">
@@ -97,42 +97,56 @@
             const fileInput = this.querySelector('input[type="file"]');
             
             if (!fileInput.files || !fileInput.files[0]) {
-                alert('Please select an image file');
+                window.toast.show('Please select an image file', 'warning');
                 return;
             }
 
             const formData = new FormData(this);
 
             try {
-                const response = await fetch(this.action, {  // Updated to use form's action
+                const response = await fetch(this.action, {
                     method: 'POST',
                     body: formData,
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                     },
-                    // Remove Content-Type header to let browser set it with boundary
                     credentials: 'same-origin'
                 });
 
                 const data = await response.json();
+                // console.log('Response:', response);
+                // console.log('Response Data:', data);
+                // alert(JSON.stringify(data, null, 2));
 
                 if (response.ok) {
-                    location.reload();
+                    window.toast.show(data.message, 'success');
+                    const avatarImg = this.closest('.card-body').querySelector('img');
+                    avatarImg.src = data.avatar;
+                    this.reset();
                 } else {
-                    throw new Error(data.error || 'Failed to update profile picture');
+                    // Handle validation errors and other errors
+                    const errorMessage = data.error || 'Failed to update profile picture';
+                    window.toast.show(errorMessage, response.status === 422 ? 'warning' : 'error');
+                    this.reset(); // Reset form on error too
                 }
             } catch (error) {
-                alert(error.message);
+                window.toast.show(error.message, 'error');
             }
         });
 
         document.getElementById('passwordForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const newPassword = document.getElementById('new_password').value;
-            const confirmPassword = document.getElementById('password_confirmation').value;
+            const newPassword = document.getElementById('new_password');
+            const confirmPassword = document.getElementById('password_confirmation');
+            const currentPassword = document.querySelector('input[name="current_password"]');
             
-            if (newPassword !== confirmPassword) {
-                document.getElementById('password_confirmation').classList.add('is-invalid');
+            // Reset validation states
+            newPassword.classList.remove('is-invalid');
+            confirmPassword.classList.remove('is-invalid');
+            currentPassword.classList.remove('is-invalid');
+            
+            if (newPassword.value !== confirmPassword.value) {
+                confirmPassword.classList.add('is-invalid');
                 return;
             }
 
@@ -143,7 +157,7 @@
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                     },
                     credentials: 'same-origin'
                 });
@@ -151,34 +165,23 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Show success toast using CoreUI
-                    const toast = new coreui.Toast(document.createElement('div'));
-                    toast._element.classList.add('toast', 'align-items-center', 'text-bg-success', 'border-0');
-                    toast._element.innerHTML = `
-                        <div class="d-flex">
-                            <div class="toast-body">Password updated successfully</div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-coreui-dismiss="toast"></button>
-                        </div>
-                    `;
-                    document.body.appendChild(toast._element);
-                    toast.show();
-                    
+                    // Show success toast
+                    window.toast.show(data.message, 'success');
+                    // Reset form
                     this.reset();
                 } else {
+                    // Handle validation errors
+                    if (data.error === 'Current password is incorrect') {
+                        currentPassword.classList.add('is-invalid');
+                        currentPassword.nextElementSibling.textContent = data.error;
+                        
+                    }
+                    
                     throw new Error(data.error || 'Failed to update password');
                 }
             } catch (error) {
-                // Show error toast using CoreUI
-                const toast = new coreui.Toast(document.createElement('div'));
-                toast._element.classList.add('toast', 'align-items-center', 'text-bg-danger', 'border-0');
-                toast._element.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">${error.message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-coreui-dismiss="toast"></button>
-                    </div>
-                `;
-                document.body.appendChild(toast._element);
-                toast.show();
+                // Show error toast
+                window.toast.show(error.message, 'error');
             }
         });
     </script>
