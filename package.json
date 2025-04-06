@@ -23,6 +23,9 @@
         "@coreui/icons": "^3.0.1",
         "@coreui/icons-pro": "^3.0.0",
         "@popperjs/core": "^2.11.8",
-        "chart.js": "^4.4.8"
+        "chart.js": "^4.4.8",
+        "datatables.net": "^2.2.2",
+        "datatables.net-dt": "^2.2.2",
+        "jquery": "^3.7.1"
     }
 }

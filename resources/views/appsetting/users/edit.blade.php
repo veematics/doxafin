@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="container-lg">
+    <div class="container-lg px-4">
         <div class="row mb-4">
             <div class="col">
                 <h2>Edit User</h2>
@@ -13,39 +13,59 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Edit User Details</strong>
+            </div>
             <div class="card-body">
                 <form action="{{ route('appsetting.users.update', $user) }}" method="POST">
                     @csrf
                     @method('PUT')
+
                     <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $user->name) }}" required>
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                               id="name" name="name" value="{{ old('name', $user->name) }}" required>
                         @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $user->email) }}" required>
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                               id="email" name="email" value="{{ old('email', $user->email) }}" required>
                         @error('email')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" class="form-control @error('password') is-invalid @enderror" name="password">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password">
                         <div class="form-text">Leave blank to keep current password</div>
                         @error('password')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" name="password_confirmation">
+                        <label for="is_active" class="form-label">Status</label>
+                        <select class="form-select @error('is_active') is-invalid @enderror" 
+                                id="is_active" name="is_active">
+                            <option value="1" {{ $user->is_active ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ !$user->is_active ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                        @error('is_active')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                    <button type="submit" class="btn btn-primary">Update User</button>
-                    <a href="{{ route('appsetting.users.index') }}" class="btn btn-secondary">Cancel</a>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Update User</button>
+                        <a href="{{ route('appsetting.users.index') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
                 </form>
             </div>
         </div>

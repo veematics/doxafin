@@ -3,6 +3,7 @@ import { initSidebarHandler } from './sidebar-handler';
 window.coreui = coreui;
 
 import Alpine from 'alpinejs';
+import $ from 'jquery';
 
 window.Alpine = Alpine;
 

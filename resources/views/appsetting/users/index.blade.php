@@ -18,7 +18,7 @@
                 <a href="{{ route('appsetting.users.create') }}" class="btn btn-primary btn-sm">Add User</a>
             </div>
             <div class="card-body">
-                <table class="table">
+                <table class="table" id="usersTable">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -54,7 +54,9 @@
         </div>
     </div>
     @push('scripts')
+    
         <script>
+              
             async function toggleUserStatus(userId, status) {
                 try {
                     const response = await fetch(`/appsetting/users/${userId}/toggle-status`, {
