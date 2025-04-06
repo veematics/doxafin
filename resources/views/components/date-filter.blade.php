@@ -11,7 +11,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="dateFilterModalLabel">Date Filter</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
@@ -27,15 +27,7 @@
                                 <option value="custom">Custom</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Date Format</label>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="dateFormat" id="formatDMY" value="DD-MM-YYYY" checked>
-                                <label class="btn btn-outline-primary" for="formatDMY">DD-MM-YYYY</label>
-                                <input type="radio" class="btn-check" name="dateFormat" id="formatMDY" value="MM-DD-YYYY">
-                                <label class="btn btn-outline-primary" for="formatMDY">MM-DD-YYYY</label>
-                            </div>
-                        </div>
+                        
                     </div>
                     <div class="row" id="customDateInputs">
                         <div class="col-md-6">
@@ -53,7 +45,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="applyDateFilter">Apply</button>
                 </div>
             </div>

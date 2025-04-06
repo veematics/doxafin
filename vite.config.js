@@ -13,11 +13,13 @@ export default defineConfig({
         }),
     ],
     server: {
-        host: '0.0.0.0',
+        host: 'doxaapp.doxa',
         hmr: {
-            host: 'localhost'
+            host: 'doxaapp.doxa'
+        },
+        watch: {
+            usePolling: true,
         },
         cors: true,
-        origin: 'http://doxaapp.doxa:5173',
     },
 });
