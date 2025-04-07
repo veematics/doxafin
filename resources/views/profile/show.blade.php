@@ -147,6 +147,7 @@
             
             if (newPassword.value !== confirmPassword.value) {
                 confirmPassword.classList.add('is-invalid');
+                window.toast.show('Passwords do not match', 'danger');
                 return;
             }
 
@@ -165,23 +166,23 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Show success toast
-                    window.toast.show(data.message, 'success');
-                    // Reset form
+                    window.toast.show(data.message, data.type || 'success');
                     this.reset();
                 } else {
-                    // Handle validation errors
                     if (data.error === 'Current password is incorrect') {
                         currentPassword.classList.add('is-invalid');
                         currentPassword.nextElementSibling.textContent = data.error;
-                        
+                        window.toast.show(data.error, 'danger');
+                    } else if (typeof data.error === 'object') {
+                        // Handle validation errors
+                        const firstError = Object.values(data.error)[0][0];
+                        window.toast.show(firstError, 'danger');
+                    } else {
+                        window.toast.show(data.error || 'Failed to update password', 'danger');
                     }
-                    
-                    throw new Error(data.error || 'Failed to update password');
                 }
             } catch (error) {
-                // Show error toast
-                window.toast.show(error.message, 'error');
+                window.toast.show('An error occurred while updating password', 'danger');
             }
         });
     </script>

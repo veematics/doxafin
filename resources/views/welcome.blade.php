@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/images/app/' . ($appSetup->AppsShortLogo ?? 'favicon.ico')) }}">
+        <link rel="icon" type="image/x-icon" href="{{ $appSetup->AppsShortLogo ? asset('storage/images/app/' . $appSetup->AppsShortLogo) : asset('images/logo-narrow.webp') }}">
         
         <title>{{ $appSetup->AppsName }}</title>
         <!-- Fonts -->
@@ -26,7 +26,7 @@
                         <div class="row g-0">
                             <div class="col-lg-5 bg-dark text-white d-flex align-items-center justify-content-center p-5">
                                 <div class="text-center">
-                                <img src="{{ asset('storage/images/app/' . ($appSetup->AppsLogo ?? 'logo.png')) }}" alt="{{ $appSetup->AppsName }}" class="logo">
+                                <img src="{{ $appSetup->AppsLogo ? asset('storage/images/app/' . $appSetup->AppsLogo) : asset('images/logo.png') }}" alt="{{ $appSetup->AppsName }}" style="max-width: 250px" class="logo">
                                     <h3 class="mt-3 mb-0">{{ $appSetup->AppsTitle }}</h3>
                                     <p class="lead">{{ $appSetup->AppsSubTitle }}</p>
                                 </div>

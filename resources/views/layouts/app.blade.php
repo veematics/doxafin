@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/images/app/' . ($appSetup->AppsShortLogo ?? 'favicon.ico')) }}">
+        <link rel="icon" type="image/x-icon" href="{{ $appSetup->AppsShortLogo ? asset('storage/images/app/' . $appSetup->AppsShortLogo) : asset('images/logo-narrow.webp') }}">
         <title>{{ $appSetup->AppsName }}</title>
 
         <!-- Fonts -->
@@ -52,10 +52,10 @@
       <div class="sidebar-header border-bottom">
         <div class="sidebar-brand">
           <div class="sidebar-brand-full" alt="CoreUI Logo">
-            <img src="{{ asset('storage/images/app/' . ($appSetup->AppsLogo ?? 'logo.png')) }}" width="200">
+            <img src="{{ $appSetup->AppsLogo ? asset('storage/images/app/' . $appSetup->AppsLogo) : asset('images/logo.png') }}" width="200">
             </div>
           <div class="sidebar-brand-narrow" width="50" height="50" alt="CoreUI Logo">
-          <img src="{{ asset('storage/images/app/' . ($appSetup->AppsShortLogo ?? 'logo-narrow.webp')) }}" width="40">
+          <img src="{{ $appSetup->AppsShortLogo ? asset('storage/images/app/' . $appSetup->AppsShortLogo) : asset('images/logo-narrow.webp') }}" width="40">
             </div>
         </div>
         <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
