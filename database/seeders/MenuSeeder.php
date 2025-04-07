@@ -11,32 +11,34 @@ class MenuSeeder extends Seeder
     {
         $menus = [
             [
-                'id' => 1,
                 'name' => 'Sidebar Menu',
                 'description' => 'Main sidebar navigation menu',
-                'created_at' => '2025-04-07 05:01:31',
-                'updated_at' => '2025-04-07 05:01:31'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 2,
                 'name' => 'Personal Menu',
                 'description' => 'Personal user navigation menu',
-                'created_at' => '2025-04-07 05:01:31',
-                'updated_at' => '2025-04-07 05:01:31'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 4,
                 'name' => 'Super Admin',
                 'description' => 'Superadmin',
-                'created_at' => '2025-04-07 08:30:46',
-                'updated_at' => '2025-04-07 08:30:46'
+                'created_at' => now(),
+                'updated_at' => now()
             ]
         ];
 
+        DB::table('menus')->insert($menus);
+
+        // Get the inserted menu IDs
+        $personalMenuId = DB::table('menus')->where('name', 'Personal Menu')->first()->id;
+        $superAdminMenuId = DB::table('menus')->where('name', 'Super Admin')->first()->id;
+
         $menuItems = [
             [
-                'id' => 246,
-                'menu_id' => 2,
+                'menu_id' => $personalMenuId,
                 'parent_id' => null,
                 'item_type' => 'free_form',
                 'order' => 0,
@@ -46,12 +48,11 @@ class MenuSeeder extends Seeder
                 'target' => '_self',
                 'app_feature_id' => null,
                 'custom_data' => null,
-                'created_at' => '2025-04-07 11:18:47',
-                'updated_at' => '2025-04-07 11:18:47'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 251,
-                'menu_id' => 4,
+                'menu_id' => $superAdminMenuId,
                 'parent_id' => null,
                 'item_type' => 'free_form',
                 'order' => 0,
@@ -61,12 +62,11 @@ class MenuSeeder extends Seeder
                 'target' => '_self',
                 'app_feature_id' => null,
                 'custom_data' => null,
-                'created_at' => '2025-04-07 11:53:41',
-                'updated_at' => '2025-04-07 11:53:41'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 252,
-                'menu_id' => 4,
+                'menu_id' => $superAdminMenuId,
                 'parent_id' => null,
                 'item_type' => 'free_form',
                 'order' => 1,
@@ -76,12 +76,11 @@ class MenuSeeder extends Seeder
                 'target' => '_self',
                 'app_feature_id' => null,
                 'custom_data' => null,
-                'created_at' => '2025-04-07 11:53:41',
-                'updated_at' => '2025-04-07 11:53:41'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 253,
-                'menu_id' => 4,
+                'menu_id' => $superAdminMenuId,
                 'parent_id' => null,
                 'item_type' => 'free_form',
                 'order' => 2,
@@ -91,12 +90,11 @@ class MenuSeeder extends Seeder
                 'target' => '_self',
                 'app_feature_id' => null,
                 'custom_data' => null,
-                'created_at' => '2025-04-07 11:53:41',
-                'updated_at' => '2025-04-07 11:53:41'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 254,
-                'menu_id' => 4,
+                'menu_id' => $superAdminMenuId,
                 'parent_id' => null,
                 'item_type' => 'free_form',
                 'order' => 3,
@@ -106,12 +104,11 @@ class MenuSeeder extends Seeder
                 'target' => '_self',
                 'app_feature_id' => null,
                 'custom_data' => null,
-                'created_at' => '2025-04-07 11:53:41',
-                'updated_at' => '2025-04-07 11:53:41'
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'id' => 255,
-                'menu_id' => 4,
+                'menu_id' => $superAdminMenuId,
                 'parent_id' => null,
                 'item_type' => 'free_form',
                 'order' => 4,
@@ -121,12 +118,11 @@ class MenuSeeder extends Seeder
                 'target' => '_self',
                 'app_feature_id' => null,
                 'custom_data' => null,
-                'created_at' => '2025-04-07 11:53:41',
-                'updated_at' => '2025-04-07 11:53:41'
+                'created_at' => now(),
+                'updated_at' => now()
             ]
         ];
 
-        DB::table('menus')->insert($menus);
         DB::table('menu_items')->insert($menuItems);
     }
 }

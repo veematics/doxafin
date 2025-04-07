@@ -1,10 +1,19 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Features Management') }}
-        </h2>
-    </x-slot>
 
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <div class="fs-2 fw-semibold" data-coreui-i18n="dashboard">App Features</div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" data-coreui-i18n="home">Home</a></li>
+                    <li class="breadcrumb-item active"><span data-coreui-i18n="dashboard">Application Features</span></li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            
+        </div>
+    </div>
     <div class="body flex-grow-1 px-3">
         <div class="container-lg">
             <div class="card mb-4">

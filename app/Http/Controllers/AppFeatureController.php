@@ -26,12 +26,8 @@ class AppFeatureController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'featureName' => 'required|string|max:255',
-            'featureIcon' => 'required|string|max:255',
-            'featurePath' => 'required|string|max:255',
-        ]);
-
+        $validated = $this->validateFeature($request);
+        
         $validated['featureActive'] = $request->has('featureActive') ? 1 : 0;
 
         AppFeature::create($validated);
@@ -42,31 +38,44 @@ class AppFeatureController extends Controller
 
     public function update(Request $request, AppFeature $appfeature)
     {
-        $validated = $request->validate([
-            'featureName' => 'required|string|max:255',
-            'featureIcon' => 'required|string|max:255',
-            'featurePath' => 'required|string|max:255',
-            'custom_permission' => [
-                'nullable',
-                function ($attribute, $value, $fail) {
-                    if (!empty($value)) {
-                        $lines = explode("\n", $value);
-                        foreach ($lines as $line) {
-                            if (!preg_match('/^[a-zA-Z_]+:.+$/', trim($line))) {
-                                $fail('Custom permission format is invalid. Format should be [PERMISSION_NAME]:[Permission options]');
-                            }
-                        }
-                    }
-                }
-            ],
-        ]);
-
+        $validated = $this->validateFeature($request);
+        
         $validated['featureActive'] = $request->has('featureActive') ? 1 : 0;
 
         $appfeature->update($validated);
 
         return redirect()->route('appsetting.appfeature.index')
             ->with('success', 'Feature updated successfully.');
+    }
+
+    protected function validateFeature(Request $request)
+    {
+        return $request->validate([
+            'featureName' => 'required|string|max:255',
+            'featureIcon' => 'required|string|max:255',
+            'featurePath' => 'required|string|max:255',
+            'custom_permission' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (empty($value)) {
+                        return; // Empty value is allowed
+                    }
+
+                    $lines = explode("\n", $value);
+                    foreach ($lines as $lineNumber => $line) {
+                        $line = trim($line);
+                        if (empty($line)) {
+                            continue; // Skip empty lines
+                        }
+
+                        if (!preg_match('/^[a-zA-Z][a-zA-Z0-9\s_]+:[a-zA-Z0-9\s,]+$/', $line)) {
+                            $fail("Invalid format at line " . ($lineNumber + 1) . ". Format should be 'Permission Name:Option1, Option2'");
+                        }
+                    }
+                }
+            ]
+        ]);
     }
 
     public function destroy(AppFeature $appfeature)

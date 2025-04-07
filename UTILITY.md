@@ -47,6 +47,47 @@ try {
 }
  ```
 
+## Permission Checking
+
+### Overview
+The `hasPermissionForFeature()` method provides a standardized way to check user permissions for specific features throughout the application.
+
+### Usage
+
+#### Blade Template Example
+```php
+@if(auth()->user()->hasPermissionForFeature(7, 'can_edit'))
+    {{-- Show edit button --}}
+    <button class="btn btn-primary">Edit Feature</button>
+@endif
+
+@unless(auth()->user()->hasPermissionForFeature(7, 'can_edit'))
+    <div class="alert alert-warning">You don't have edit permission</div>
+@endunless
+```
+
+#### Controller Example
+```php
+public function edit($featureId)
+{
+    if (!auth()->user()->hasPermissionForFeature($featureId, 'can_edit')) {
+        abort(403, 'Unauthorized action');
+    }
+    
+    // Continue with edit logic
+    return view('features.edit');
+}
+
+public function update(Request $request, $featureId)
+{
+    if (!$request->user()->hasPermissionForFeature($featureId, 'can_edit')) {
+        return back()->with('error', 'Permission denied');
+    }
+    
+    // Update logic here
+}
+ ```
+
 ## Date Filter Component
 ### Overview
 The Date Filter component provides a standardized way to filter data by date range across the application.

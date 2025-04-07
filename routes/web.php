@@ -3,8 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\AppFeatureController;  // Add this line
+use App\Http\Controllers\AppFeatureController;
 use App\Http\Controllers\AppSetupController;
+use App\Http\Controllers\RoleController;  // Add this line
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 
@@ -44,6 +45,14 @@ Route::get('/dashboard', function () {
         Route::post('menu/{menu}/structure', [MenuController::class, 'structure'])->name('menu.structure');
         Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class)->except(['index', 'create', 'edit']);
        
+        // Role Management Routes
+        Route::resource('roles', RoleController::class)->except(['show']);
+        Route::get('roles/{role}/members', [RoleController::class, 'members'])->name('roles.members');
+        Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
+        Route::post('roles/{role}/add-members', [RoleController::class, 'addMembers'])
+            ->name('roles.add-members');
+        Route::post('roles/{role}/remove-member/{user}', [RoleController::class, 'removeMember'])
+            ->name('roles.remove-member');
     });
 
 

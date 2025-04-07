@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AppFeature extends Model
 {
@@ -11,13 +12,16 @@ class AppFeature extends Model
     protected $primaryKey = 'featureID';
     
     protected $fillable = [
-
-        
         'featureName',
         'featureIcon',
         'featurePath',
         'featureActive',
-        'custom_permission', // Add this line
+        'custom_permission'
+    ];
+
+    protected $casts = [
+        'featureActive' => 'boolean',
+        'custom_permission' => 'array'
     ];
     
     /**
@@ -36,5 +40,21 @@ class AppFeature extends Model
         return static::where('active', true)
             ->orderBy('feature_name')
             ->get();
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Role::class,
+            'feature_role',
+            'feature_id',
+            'role_id'
+        )->withPivot([
+            'can_view',
+            'can_create',
+            'can_edit',
+            'can_delete',
+            'additional_permissions'
+        ])->withTimestamps();
     }
 }

@@ -105,19 +105,23 @@
                         </div>
 
                         <!-- Special Permission -->
-                        <div class="form-group">
-                            <label for="custom_permission">Custom Permission</label>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="custom_permission">Custom Permission</label>
                             <textarea 
                                 class="form-control @error('custom_permission') is-invalid @enderror" 
                                 id="custom_permission" 
                                 name="custom_permission" 
                                 rows="4" 
-                                placeholder="Enter custom permissions (e.g., view_access:Global, Own, Territories)"
+                                placeholder="Example:&#10;view_access:Global, Own, Territories&#10;data_access:Full, Partial, None"
                             >{{ old('custom_permission', $appfeature->custom_permission ?? '') }}</textarea>
-                            <small class="form-text text-muted">
-                                Format: [PERMISSION_NAME]:[Permission options]. Leave empty for no custom permissions.
-                                Each permission on a new line.
-                            </small>
+                            <div class="form-text text-muted">
+                                <small>Format guidelines:</small>
+                                <ul class="mb-0 ps-3 small">
+                                    <li>Leave blank for no custom permissions</li>
+                                    <li>Each line format: [Permission Name]:[Option1, Option2, ...]</li>
+                                    <li>Multiple permissions should be on separate lines</li>
+                                </ul>
+                            </div>
                             @error('custom_permission')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
