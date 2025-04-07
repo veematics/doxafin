@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('appfeatures', function (Blueprint $table) {
-            $table->boolean('featureActive')->default(1)->after('featurePath');
-        });
+        if (!Schema::hasColumn('appfeatures', 'featureActive')) {
+            Schema::table('appfeatures', function (Blueprint $table) {
+                $table->boolean('featureActive')->default(1)->after('featurePath');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('appfeatures', function (Blueprint $table) {
-            $table->dropColumn('featureActive');
-        });
+        if (Schema::hasColumn('appfeatures', 'featureActive')) {
+            Schema::table('appfeatures', function (Blueprint $table) {
+                $table->dropColumn('featureActive');
+            });
+        }
     }
 };
