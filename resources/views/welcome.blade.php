@@ -3,16 +3,17 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/images/app/' . ($appSetup->AppsShortLogo ?? 'favicon.ico')) }}">
+        
+        <title>{{ $appSetup->AppsName }}</title>
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
         <!-- Styles / Scripts -->
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-            @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+            <!-- Replace the existing Vite line with -->
+            @vite(['resources/sass/app.scss', 'resources/js/nonapp.js'])
         @else
             <!-- Fallback styles would go here -->
         @endif
@@ -25,9 +26,9 @@
                         <div class="row g-0">
                             <div class="col-lg-5 bg-dark text-white d-flex align-items-center justify-content-center p-5">
                                 <div class="text-center">
-                                   <img src="{{ asset('images/logo.png') }}" alt="Doxadigital Logo"
-                                    <h2 class="mb-3">Doxadigital Core App</h2>
-                                    <p class="lead">Sales and Finance Application</p>
+                                <img src="{{ asset('storage/images/app/' . ($appSetup->AppsLogo ?? 'logo.png')) }}" alt="{{ $appSetup->AppsName }}" class="logo">
+                                    <h3 class="mt-3 mb-0">{{ $appSetup->AppsTitle }}</h3>
+                                    <p class="lead">{{ $appSetup->AppsSubTitle }}</p>
                                 </div>
                             </div>
                             <div class="col-lg-7 p-5">

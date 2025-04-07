@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\AppFeatureController;  // Add this line
+use App\Http\Controllers\AppSetupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])
@@ -24,17 +25,19 @@ Route::get('/dashboard', function () {
     });
 
     // --- App Settings Routes ---
-    Route::prefix('appsetting')->name('appsetting.')->group(function () {
+    Route::group(['middleware' => ['auth'], 'prefix' => 'appsetting', 'as' => 'appsetting.'], function () {
         Route::resource('users', UserManagementController::class)->except(['show']);
         Route::post('users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
              ->name('users.toggle-status');
         
         // Features Management Routes
         Route::resource('appfeature', AppFeatureController::class)->except(['show']);
+        
+        // App Setup Routes
+        Route::get('/appsetup', [AppSetupController::class, 'index'])->name('appsetup.index');
+        Route::put('/appsetup', [AppSetupController::class, 'update'])->name('appsetup.update'); // Removed {id} parameter
     });
 
-    // Add other appsetting sections here if needed...
-    // Route::prefix('roles')->name('roles.')->group(function() { ... });
 
 });
 

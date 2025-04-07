@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/images/app/' . ($appSetup->AppsShortLogo ?? 'favicon.ico')) }}">
+        <title>{{ $appSetup->AppsName }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -52,10 +52,10 @@
       <div class="sidebar-header border-bottom">
         <div class="sidebar-brand">
           <div class="sidebar-brand-full" alt="CoreUI Logo">
-            <img src="{{ asset('images/logo.png') }}" width="200">
+            <img src="{{ asset('storage/images/app/' . ($appSetup->AppsLogo ?? 'logo.png')) }}" width="200">
             </div>
           <div class="sidebar-brand-narrow" width="50" height="50" alt="CoreUI Logo">
-          <img src="{{ asset('images/logo-narrow.webp') }}" width="40">
+          <img src="{{ asset('storage/images/app/' . ($appSetup->AppsShortLogo ?? 'logo-narrow.webp')) }}" width="40">
             </div>
         </div>
         <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
@@ -489,6 +489,10 @@
                     <button type="submit" id="logout-button" class="btn btn-link" style="color: var(--cui-dropdown-link-color);padding: 0px;    margin: 0px;    position: relative;    left: -5px;    text-decoration: none;"><span data-coreui-i18n="logout">Logout</span></button>
                   </form></a>
                   <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold my-2" data-coreui-i18n="superadmin">Super Admin</div>
+                  <a class="dropdown-item"  href="{{ route('appsetting.appsetup.index') }}">
+                    <svg class="icon me-2">
+                      <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
+                    </svg><span data-coreui-i18n="appsetup">App Setup</span></a>
                   <a class="dropdown-item"  href="{{ route('appsetting.users.index') }}">
                     <svg class="icon me-2">
                       <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
