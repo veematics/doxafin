@@ -36,6 +36,14 @@ Route::get('/dashboard', function () {
         // App Setup Routes
         Route::get('/appsetup', [AppSetupController::class, 'index'])->name('appsetup.index');
         Route::put('/appsetup', [AppSetupController::class, 'update'])->name('appsetup.update'); // Removed {id} parameter
+    
+
+        // Menu Management Routes
+
+            Route::resource('menu', \App\Http\Controllers\MenuController::class);
+            Route::post('menu/{menu}/structure', [\App\Http\Controllers\MenuController::class, 'saveStructure'])->name('menu.structure');
+            Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class)->except(['index', 'create', 'edit']);
+       
     });
 
 

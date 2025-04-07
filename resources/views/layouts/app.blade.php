@@ -501,6 +501,14 @@
                     <svg class="icon me-2">
                       <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
                     </svg><span data-coreui-i18n="feature">Feature</span></a>
+                    <a class="dropdown-item"  href="{{ route('appsetting.users.index') }}">
+                    <svg class="icon me-2">
+                      <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
+                    </svg><span data-coreui-i18n="usermanagement">User Management</span></a>
+                    <a class="dropdown-item"  href="{{ route('appsetting.menu.index') }}">
+                    <svg class="icon me-2">
+                      <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
+                    </svg><span data-coreui-i18n="menu">Menu BUilder</span></a>
               </div>
             </li>
           </ul>
