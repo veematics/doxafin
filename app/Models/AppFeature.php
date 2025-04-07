@@ -11,10 +11,13 @@ class AppFeature extends Model
     protected $primaryKey = 'featureID';
     
     protected $fillable = [
+
+        
         'featureName',
         'featureIcon',
         'featurePath',
-        'featureActive'
+        'featureActive',
+        'custom_permission', // Add this line
     ];
     
     /**

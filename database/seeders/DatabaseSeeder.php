@@ -2,27 +2,31 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
+    public function run()
     {
-        // User::factory(10)->create();
+        // Get existing data from the database
+        $existingMenus = DB::table('appfeatures')->get();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-        $this->call([
-            MenuSeeder::class,
-            TestUserSeeder::class
-        ]);
-        $this->call(AppSetupSeeder::class);
+        // Prepare the data for seeding
+        $menuData = [];
+        foreach ($existingMenus as $menu) {
+            $menuData[] = [
+                'featureName' => $menu->featureName,
+                'featureIcon' => $menu->featureIcon,
+                'featurePath' => $menu->featurePath,
+                'featureActive' => $menu->featureActive,
+                'custom_permission' => $menu->custom_permission,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // Insert the data
+        DB::table('appfeatures')->insert($menuData);
     }
 }

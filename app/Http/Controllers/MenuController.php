@@ -36,16 +36,12 @@ class MenuController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:sidebar,personal',
             'description' => 'nullable|string',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
-
         $menu = Menu::create($validated);
 
-        return redirect()
-            ->route('menu.edit', $menu)
+        return redirect()->route('appsetting.menu.index')
             ->with('success', 'Menu created successfully.');
     }
 
@@ -53,16 +49,13 @@ class MenuController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:sidebar,personal',
             'description' => 'nullable|string',
         ]);
-
-        $validated['slug'] = Str::slug($validated['name']);
 
         $menu->update($validated);
 
         return redirect()
-            ->route('menu.edit', $menu)
+            ->route('appsetting.menu.edit', $menu)
             ->with('success', 'Menu updated successfully.');
     }
 
@@ -71,11 +64,12 @@ class MenuController extends Controller
         $menu->delete(); // Cascade deletion handled by foreign key
 
         return redirect()
-            ->route('menu.index')
+            ->route('appsetting.menu.index')
             ->with('success', 'Menu deleted successfully.');
     }
 
-    public function saveStructure(Request $request, Menu $menu)
+    // Change method name from saveStructure to structure
+    public function structure(Request $request, Menu $menu)
     {
         $request->validate([
             'structure' => 'required|array',
@@ -84,27 +78,38 @@ class MenuController extends Controller
         try {
             DB::beginTransaction();
 
-            $this->updateMenuStructure($request->structure);
+            // Clear existing items for this menu
+            MenuItem::where('menu_id', $menu->id)->delete();
+
+            // Create new structure
+            $this->createMenuStructure($request->structure, $menu->id);
 
             DB::commit();
 
-            return response()->json(['message' => 'Menu structure updated successfully']);
+            return response()->json(['success' => true, 'message' => 'Menu structure updated successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to update menu structure'], 500);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
-    private function updateMenuStructure(array $items, $parentId = null, $order = 0)
+    private function createMenuStructure(array $items, $menuId, $parentId = null, $order = 0)
     {
         foreach ($items as $item) {
-            MenuItem::where('id', $item['id'])->update([
+            // Create new menu item
+            $menuItem = MenuItem::create([
+                'menu_id' => $menuId,
                 'parent_id' => $parentId,
-                'order' => $order,
+                'title' => $item['title'],
+                'icon' => $item['icon'],
+                'item_type' => $item['item_type'],
+                'app_feature_id' => $item['app_feature_id'],
+                'path' => $item['path'],
+                'order' => $order
             ]);
 
             if (!empty($item['children'])) {
-                $this->updateMenuStructure($item['children'], $item['id'], 0);
+                $this->createMenuStructure($item['children'], $menuId, $menuItem->id, 0);
             }
 
             $order++;

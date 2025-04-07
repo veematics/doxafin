@@ -6,6 +6,21 @@
     </x-slot>
 
     <div class="body flex-grow-1 px-3">
+    <div class="row align-items-center mb-4">
+    <div class="col">
+        <div class="fs-2 fw-semibold" data-coreui-i18n="dashboard"> Menu</div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" data-coreui-i18n="home">Home</a></li>
+                <li class="breadcrumb-item">Menu</li>
+             
+            </ol>
+        </nav>
+    </div>
+    <div class="col-auto">
+        
+    </div>
+</div>
         <div class="container-lg">
             <div class="card mb-4">
                 <div class="card-header">
@@ -22,7 +37,7 @@
                             <thead>
                                 <tr>
                                     <th>Name</th>
-                                    <th>Type</th>
+                              
                                     <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
@@ -31,12 +46,12 @@
                                 @forelse($menus as $menu)
                                     <tr>
                                         <td>{{ $menu->name }}</td>
-                                        <td>{{ ucfirst($menu->type) }}</td>
+                            
                                         <td>{{ $menu->description }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('appsetting.menu.edit', $menu) }}" 
-                                                   class="btn btn-primary btn-sm">
+                                                   class="btn btn-primary btn-sm me-2">
                                                     <i class="cil-pencil"></i> Edit
                                                 </a>
                                                 <form action="{{ route('appsetting.menu.destroy', $menu) }}" 
@@ -45,7 +60,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" 
-                                                            class="btn btn-danger btn-sm"
+                                                            class="btn btn-secondary btn-sm"
                                                             onclick="return confirm('Are you sure?')">
                                                         <i class="cil-trash"></i> Delete
                                                     </button>

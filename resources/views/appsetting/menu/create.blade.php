@@ -12,7 +12,7 @@
                     <strong>Create New Menu</strong>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('menu.store') }}">
+                    <form method="POST" action="{{ route('appsetting.menu.store') }}">
                         @csrf
                         
                         <div class="mb-3">
@@ -28,24 +28,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="type">Menu Type</label>
-                            <select class="form-select @error('type') is-invalid @enderror" 
-                                    id="type"
-                                    name="type"
-                                    required>
-                                <option value="">Select Type</option>
-                                <option value="sidebar" {{ old('type') === 'sidebar' ? 'selected' : '' }}>
-                                    Sidebar Menu
-                                </option>
-                                <option value="personal" {{ old('type') === 'personal' ? 'selected' : '' }}>
-                                    Personal Menu
-                                </option>
-                            </select>
-                            @error('type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Remove the menu type select field -->
 
                         <div class="mb-3">
                             <label class="form-label" for="description">Description</label>
@@ -59,7 +42,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ route('menu.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('appsetting.menu.index') }}" class="btn btn-secondary">
                                 <i class="cil-x"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">

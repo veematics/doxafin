@@ -106,6 +106,26 @@
                             </div>
                         </div>
 
+                        <!-- Special Permission -->
+                        <div class="form-group">
+                            <label for="custom_permission">Custom Permission</label>
+                            <textarea 
+                                class="form-control @error('custom_permission') is-invalid @enderror" 
+                                id="custom_permission" 
+                                name="custom_permission" 
+                                rows="4" 
+                                placeholder="Enter custom permissions (e.g., view_access:Global, Own, Territories)"
+                            >{{ old('custom_permission', $appfeature->custom_permission ?? '') }}</textarea>
+                            <small class="form-text text-muted">
+                                Format: [PERMISSION_NAME]:[Permission options]. Leave empty for no custom permissions.
+                                Each permission on a new line.
+                            </small>
+                            @error('custom_permission')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+
                         <!-- Form buttons -->
                         <div class="row">
                             <div class="col-sm-12">

@@ -11,14 +11,12 @@ class MenuItem extends Model
     protected $fillable = [
         'menu_id',
         'parent_id',
-        'item_type',
-        'order',
         'title',
         'icon',
-        'path',
-        'target',
+        'item_type',
         'app_feature_id',
-        'custom_data',
+        'path',
+        'order'
     ];
 
     protected $casts = [

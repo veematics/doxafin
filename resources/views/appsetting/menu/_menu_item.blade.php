@@ -1,69 +1,25 @@
-<div class="menu-item" data-id="{{ $menuItem->id }}">
-    <div class="menu-item-header d-flex align-items-center p-2 border rounded mb-2">
-        <i class="cil-menu handle me-2"></i>
-        <div class="me-auto">
-            <span class="menu-item-title">{{ $menuItem->title }}</span>
-            <small class="text-muted">{{ $menuItem->item_type }}</small>
+<div class="menu-item mb-2" data-id="{{ $menuItem->id }}" data-type="{{ $menuItem->item_type }}" data-feature-id="{{ $menuItem->app_feature_id }}" data-path="{{ $menuItem->path }}">
+    <div class="menu-item-header p-2 border rounded bg-light d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <span class="handle me-2 cursor-move"><i class="cil-menu"></i></span>
+            <span class="menu-item-title"><i class="{{ $menuItem->icon }}"></i> {{ $menuItem->title }}</span>
         </div>
-        <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-outline-primary toggle-item-form">
+        <div class="menu-item-actions">
+            <button type="button" class="btn btn-sm btn-primary edit-menu-item me-1"
+                    data-title="{{ $menuItem->title }}"
+                    data-path="{{ $menuItem->path }}"
+                    data-icon="{{ $menuItem->icon }}"
+                    data-item-id="{{ $menuItem->id }}">
                 <i class="cil-pencil"></i>
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger delete-menu-item">
+            <button type="button" class="btn btn-sm btn-danger delete-menu-item">
                 <i class="cil-trash"></i>
             </button>
         </div>
     </div>
-
-    <div class="menu-item-form p-3 border rounded mb-3" style="display: none;">
-        <form class="update-menu-item-form">
-            <input type="hidden" name="id" value="{{ $menuItem->id }}">
-            
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                <input type="text" class="form-control" name="title" value="{{ $menuItem->title }}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Icon</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="{{ $menuItem->icon }}"></i>
-                    </span>
-                    <input type="text" class="form-control" name="icon" value="{{ $menuItem->icon }}" readonly>
-                    <button type="button" class="btn btn-outline-secondary icon-picker-btn">
-                        Select Icon
-                    </button>
-                </div>
-            </div>
-
-            @if($menuItem->item_type === 'free_form')
-                <div class="mb-3">
-                    <label class="form-label">URL</label>
-                    <input type="text" class="form-control" name="path" value="{{ $menuItem->path }}">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Target</label>
-                    <select class="form-select" name="target">
-                        <option value="_self" {{ $menuItem->target === '_self' ? 'selected' : '' }}>Same Window</option>
-                        <option value="_blank" {{ $menuItem->target === '_blank' ? 'selected' : '' }}>New Window</option>
-                    </select>
-                </div>
-            @endif
-
-            <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
-                <button type="submit" class="btn btn-primary">Update</button>
-            </div>
-        </form>
+    <div class="menu-item-children ps-4 mt-2">
+        @foreach($menuItem->children as $child)
+            @include('appsetting.menu._menu_item', ['menuItem' => $child])
+        @endforeach
     </div>
-
-    @if($menuItem->children->isNotEmpty())
-        <div class="menu-item-children ps-4">
-            @foreach($menuItem->children as $child)
-                @include('admin.menus._menu_item', ['menuItem' => $child])
-            @endforeach
-        </div>
-    @endif
 </div>

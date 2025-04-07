@@ -46,6 +46,19 @@ class AppFeatureController extends Controller
             'featureName' => 'required|string|max:255',
             'featureIcon' => 'required|string|max:255',
             'featurePath' => 'required|string|max:255',
+            'custom_permission' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value)) {
+                        $lines = explode("\n", $value);
+                        foreach ($lines as $line) {
+                            if (!preg_match('/^[a-zA-Z_]+:.+$/', trim($line))) {
+                                $fail('Custom permission format is invalid. Format should be [PERMISSION_NAME]:[Permission options]');
+                            }
+                        }
+                    }
+                }
+            ],
         ]);
 
         $validated['featureActive'] = $request->has('featureActive') ? 1 : 0;

@@ -6,6 +6,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\AppFeatureController;  // Add this line
 use App\Http\Controllers\AppSetupController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MenuController;
 
 Route::get('/', [WelcomeController::class, 'index'])
     ->middleware('guest')
@@ -39,10 +40,9 @@ Route::get('/dashboard', function () {
     
 
         // Menu Management Routes
-
-            Route::resource('menu', \App\Http\Controllers\MenuController::class);
-            Route::post('menu/{menu}/structure', [\App\Http\Controllers\MenuController::class, 'saveStructure'])->name('menu.structure');
-            Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class)->except(['index', 'create', 'edit']);
+        Route::resource('menu', MenuController::class);
+        Route::post('menu/{menu}/structure', [MenuController::class, 'structure'])->name('menu.structure');
+        Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class)->except(['index', 'create', 'edit']);
        
     });
 
@@ -50,3 +50,5 @@ Route::get('/dashboard', function () {
 });
 
 require __DIR__.'/auth.php';
+
+

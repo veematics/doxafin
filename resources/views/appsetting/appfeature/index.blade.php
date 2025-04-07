@@ -48,11 +48,11 @@
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('appsetting.appfeature.edit', $feature) }}" 
-                                                   class="btn btn-info btn-sm" 
+                                                   class="btn btn-primary btn-sm me-2" 
                                                    data-coreui-toggle="tooltip" 
                                                    data-coreui-placement="top" 
                                                    title="Edit">
-                                                    <i class="cil-pencil"></i>
+                                                    <i class="cil-pencil"></i> Edit
                                                 </a>
                                                 <form action="{{ route('appsetting.appfeature.destroy', $feature) }}" 
                                                       method="POST" 
@@ -60,12 +60,12 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" 
-                                                            class="btn btn-danger btn-sm" 
+                                                            class="btn btn-secondary btn-sm" 
                                                             data-coreui-toggle="tooltip" 
                                                             data-coreui-placement="top" 
                                                             title="Delete"
                                                             onclick="return confirm('Are you sure you want to delete this feature?')">
-                                                        <i class="cil-trash"></i>
+                                                        <i class="cil-trash"></i> Delete
                                                     </button>
                                                 </form>
                                             </div>
