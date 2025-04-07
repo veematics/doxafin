@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('appfeatures', function (Blueprint $table) {
-            $table->text('custom_permission')->nullable();
-        });
+        if (!Schema::hasColumn('appfeatures', 'custom_permission')) {
+            Schema::table('appfeatures', function (Blueprint $table) {
+                $table->text('custom_permission')->nullable();
+            });
+        }
     }
 
     public function down()
     {
-        Schema::table('appfeatures', function (Blueprint $table) {
-            $table->dropColumn('custom_permission');
-        });
+        if (Schema::hasColumn('appfeatures', 'custom_permission')) {
+            Schema::table('appfeatures', function (Blueprint $table) {
+                $table->dropColumn('custom_permission');
+            });
+        }
     }
 };
