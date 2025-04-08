@@ -28,7 +28,7 @@ class Role extends Model
 
     public function hasPermissionTo(string $featureName, string $permission): bool
     {
-        $validPermissions = ['can_view', 'can_create', 'can_edit', 'can_delete'];
+        $validPermissions = ['can_view', 'can_create', 'can_edit', 'can_delete', 'can_approve'];
         if (!in_array($permission, $validPermissions)) {
             //\Log::warning("Invalid standard permission string used: {$permission}");
             return false;

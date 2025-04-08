@@ -79,6 +79,15 @@
                                                     <input type="text" class="form-control" name="path" required>
                                                 </div>
                                                 <div class="mb-3">
+                                                    <label class="form-label">Bind Permission</label>
+                                                    <select class="form-select" name="app_feature_id">
+                                                        <option value="">No Feature</option>
+                                                        @foreach($features as $feature)
+                                                            <option value="{{ $feature->featureID }}">{{ $feature->featureName }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
                                                     <label class="form-label">Icon</label>
                                                     <div class="input-group">
                                                         <input type="text" class="form-control" name="icon" readonly>
@@ -251,6 +260,7 @@
                                     data-title="${title}"
                                     data-path="${data.path}"
                                     data-icon="${icon}"
+                                    data-feature-id="${data.app_feature_id}"
                                     data-item-id="${menuItem.dataset.id}">
                                 <i class="cil-pencil"></i>
                             </button>
@@ -309,7 +319,7 @@
                     title: formData.get('title'),
                     icon: formData.get('icon') || 'cil-link',
                     path: formData.get('path'),
-                    app_feature_id: null
+                    app_feature_id: formData.get('app_feature_id') || null
                 };
 
                 if (isEditMode && this.dataset.editItemId) {
@@ -319,6 +329,7 @@
                     if (menuItem) {
                         // Update the menu item's data attributes
                         menuItem.dataset.path = itemData.path;
+                        menuItem.dataset.featureId = itemData.app_feature_id || '';
                         
                         // Update the title and icon
                         const titleEl = menuItem.querySelector('.menu-item-title');
@@ -329,6 +340,7 @@
                         editBtn.dataset.title = itemData.title;
                         editBtn.dataset.path = itemData.path;
                         editBtn.dataset.icon = itemData.icon;
+                        editBtn.dataset.featureId = itemData.app_feature_id || '';
                         
                         // Reset form to add mode
                         this.dataset.editMode = 'false';
@@ -385,6 +397,7 @@
                 document.querySelector('input[name="title"]').value = button.dataset.title;
                 document.querySelector('input[name="path"]').value = button.dataset.path;
                 document.querySelector('input[name="icon"]').value = button.dataset.icon;
+                document.querySelector('select[name="app_feature_id"]').value = menuItem.dataset.featureId;
                 
                 // Add edit mode flag and item ID to the form
                 const form = document.getElementById('customLinkForm');

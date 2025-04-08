@@ -36,9 +36,9 @@
                             <td>
                                 <a href="{{ route('appsetting.users.edit', $user) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" 
-                                        class="btn btn-sm {{ $user->is_active ? 'btn-secondary' : 'btn-success' }}"
-                                        onclick="toggleUserStatus('{{ $user->id }}', {{ $user->is_active ? 'false' : 'true' }})">
-                                    {{ $user->is_active ? 'Disable' : 'Enable' }}
+                                        class="btn btn-sm {{ $user->is_active ? 'btn-danger' : 'btn-success' }}"
+                                        onclick="toggleUserStatus('{{ $user->id }}', '{{ $user->is_active ? 0 : 1 }}')">
+                                    {{ $user->is_active ? 'Deactivate' : 'Activate' }}
                                 </button>
                                 <form action="{{ route('appsetting.users.destroy', $user) }}" method="POST" class="d-inline">
                                     @csrf

@@ -55,6 +55,17 @@
                                                    title="Edit Role">
                                                     <i class="cil-pencil"></i>
                                                 </a>
+                                                <form action="{{ route('appsetting.roles.duplicate', $role) }}" 
+                                                      method="POST" 
+                                                      class="d-inline" >
+                                                    @csrf
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-outline-success" 
+                                                            data-coreui-toggle="tooltip" 
+                                                            title="Duplicate Role">
+                                                        <i class="cil-copy"></i>
+                                                    </button>
+                                                </form>
                                                 <form action="{{ route('appsetting.roles.destroy', $role) }}" 
                                                       method="POST" 
                                                       class="d-inline" style="position:relative;left:-10px">

@@ -3,19 +3,20 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    // In DatabaseSeeder.php
-public function run()
-{
-    $this->call([
-        RolesTableSeeder::class,
-        AppfeaturesTableSeeder::class,
-        FeatureRoleTableSeeder::class,
-        RoleUserTableSeeder::class,
-        UsersTableSeeder::class,
-    ]);
-}
+    public function run()
+    {
+        $this->call([
+            UserSeeder::class,
+            RolesTableSeeder::class,
+            AppfeaturesTableSeeder::class,
+            FeatureRoleTableSeeder::class,
+            // Remove duplicate RoleUser seeders
+            RoleUserTableSeeder::class,
+            // Add MenuSeeder
+            MenuSeeder::class,
+        ]);
+    }
 }

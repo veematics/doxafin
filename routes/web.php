@@ -26,6 +26,10 @@ Route::get('/dashboard', function () {
         Route::post('/update-avatar', [ProfileController::class, 'updateAvatar'])->name('avatar'); // Route name: profile.avatar
     });
 
+    // Coming Soon Route
+    Route::get('/coming-soon', function () {
+        return view('coming-soon');
+    })->name('coming-soon');
     // --- App Settings Routes ---
     Route::group(['middleware' => ['auth'], 'prefix' => 'appsetting', 'as' => 'appsetting.'], function () {
         Route::resource('users', UserManagementController::class)->except(['show']);
@@ -53,6 +57,7 @@ Route::get('/dashboard', function () {
             ->name('roles.add-members');
         Route::post('roles/{role}/remove-member/{user}', [RoleController::class, 'removeMember'])
             ->name('roles.remove-member');
+        Route::post('/appsetting/roles/{role}/duplicate', [RoleController::class, 'duplicate'])->name('roles.duplicate');
     });
 
 

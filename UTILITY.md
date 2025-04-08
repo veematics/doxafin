@@ -50,42 +50,62 @@ try {
 ## Permission Checking
 
 ### Overview
-The `hasPermissionForFeature()` method provides a standardized way to check user permissions for specific features throughout the application.
+The `FeatureAccess` helper class provides a standardized way to check user permissions for specific features throughout the application.
 
 ### Usage
 
-#### Blade Template Example
+#### Basic Permission Checks
 ```php
-@if(auth()->user()->hasPermissionForFeature(7, 'can_edit'))
+// Using objects
+if (FeatureAccess::canView($user, $feature)) {
+    // Show feature content
+}
+
+// Using IDs directly
+if (FeatureAccess::canViewById(auth()->id(), $featureId)) {
+    // Show feature content
+}
+```
+Available Methods
+- canView() / canViewById() - Checks if user can view the feature (levels 1-3)
+- canCreate() / canCreateById() - Checks if user can create
+- canEdit() / canEditById() - Checks if user can edit
+- canDelete() / canDeleteById() - Checks if user can delete
+- canApprove() / canApproveById() - Checks if user can approve
+- getViewLevel() / getViewLevelById() - Gets the user's view level for the feature Blade Template Example
+```php
+@if(FeatureAccess::canEdit(auth()->user(), $feature))
     {{-- Show edit button --}}
     <button class="btn btn-primary">Edit Feature</button>
 @endif
 
-@unless(auth()->user()->hasPermissionForFeature(7, 'can_edit'))
-    <div class="alert alert-warning">You don't have edit permission</div>
+@unless(FeatureAccess::canViewById(auth()->id(), $featureId))
+    <div class="alert alert-warning">You don't have view permission</div>
 @endunless
+ ```
 ```
-
-#### Controller Example
+ Controller Example
 ```php
-public function edit($featureId)
+public function edit(AppFeature $feature)
 {
-    if (!auth()->user()->hasPermissionForFeature($featureId, 'can_edit')) {
+    if (!FeatureAccess::canEdit(auth()->user(), $feature)) {
         abort(403, 'Unauthorized action');
     }
     
-    // Continue with edit logic
-    return view('features.edit');
+    return view('features.edit', compact('feature'));
 }
 
-public function update(Request $request, $featureId)
+public function update(Request $request, AppFeature $feature)
 {
-    if (!$request->user()->hasPermissionForFeature($featureId, 'can_edit')) {
+    if (!FeatureAccess::canEdit(auth()->user(), $feature)) {
         return back()->with('error', 'Permission denied');
     }
     
     // Update logic here
 }
+ ```
+```
+
  ```
 
 ## Date Filter Component

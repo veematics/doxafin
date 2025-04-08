@@ -69,14 +69,46 @@
                                                            value="{{ $feature->featureID }}">
                                                     
                                                     <div class="row g-3 mb-3">
-                                                        <div class="col-md-2">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label"><strong>View Permission</strong></label>
+                                                            <div class="ms-3">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" 
-                                                                       name="permissions[{{ $feature->featureID }}][can_view]" 
-                                                                       id="view_{{ $feature->featureID }}">
-                                                                <label class="form-check-label" for="view_{{ $feature->featureID }}">
-                                                                    Can View
-                                                                </label>
+                                                                    <input class="form-check-input" type="radio" 
+                                                                           name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                           id="view_all_{{ $feature->featureID }}"
+                                                                           value="1">
+                                                                    <label class="form-check-label" for="view_all_{{ $feature->featureID }}">
+                                                                         Global
+                                                                    </label>
+                                                            </div>
+                                                                    <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" 
+                                                                           name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                           id="view_group_{{ $feature->featureID }}"
+                                                                           value="2">
+                                                                    <label class="form-check-label" for="view_group_{{ $feature->featureID }}">
+                                                                         Group
+                                                                    </label>
+                                                                    </div>
+                                                                    <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" 
+                                                                           name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                           id="view_own_{{ $feature->featureID }}"
+                                                                           value="3">
+                                                                    <label class="form-check-label" for="view_own_{{ $feature->featureID }}">
+                                                                         Own
+                                                                    </label>
+                                                                    </div>
+                                                                    <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" 
+                                                                           name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                           id="view_none_{{ $feature->featureID }}"
+                                                                           value="4">
+                                                                    <label class="form-check-label" for="view_none_{{ $feature->featureID }}">
+                                                                         No View
+                                                                    </label>
+                                                                    </div>
+                                                                
                                                             </div>
                                                         </div>
                                                         <div class="col-md-2">

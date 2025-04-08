@@ -65,17 +65,52 @@
                                             @endphp
 
                                             <div class="row g-3 mb-3">
-                                                <div class="col-md-2">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               name="permissions[{{ $feature->featureID }}][can_view]" 
-                                                               id="view_{{ $feature->featureID }}"
-                                                               {{ $pivotData && $pivotData->can_view ? 'checked' : '' }}>
-                                                        <label class="form-check-label" for="view_{{ $feature->featureID }}">
-                                                            Can View
-                                                        </label>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">View Permission</label>
+                                                    <div class="ms-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                   id="view_all_{{ $feature->featureID }}"
+                                                                   value="1"
+                                                                   {{ $pivotData && $pivotData->can_view == 1 ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="view_all_{{ $feature->featureID }}">
+                                                                Global
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                   id="view_group_{{ $feature->featureID }}"
+                                                                   value="2"
+                                                                   {{ $pivotData && $pivotData->can_view == 2 ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="view_group_{{ $feature->featureID }}">
+                                                                Group
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                   id="view_own_{{ $feature->featureID }}"
+                                                                   value="3"
+                                                                   {{ $pivotData && $pivotData->can_view == 3 ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="view_own_{{ $feature->featureID }}">
+                                                                Own
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="permissions[{{ $feature->featureID }}][can_view]" 
+                                                                   id="view_none_{{ $feature->featureID }}"
+                                                                   value="4"
+                                                                   {{ $pivotData && $pivotData->can_view == 4 ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="view_none_{{ $feature->featureID }}">
+                                                                No View
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                              
                                                 <div class="col-md-2">
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" 
