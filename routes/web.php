@@ -26,6 +26,17 @@ Route::get('/dashboard', function () {
         Route::post('/update-avatar', [ProfileController::class, 'updateAvatar'])->name('avatar'); // Route name: profile.avatar
     });
 
+    // Debug Route
+    Route::get('/debug', function () {
+        return view('debug');
+    })->name('debug');
+    Route::post('debug/rebuild-cache', function() {
+        \App\Helpers\FeatureAccess::rebuildCache(auth()->id());
+        return back()->with('success', 'Cache rebuilt successfully');
+    })->name('debug.rebuild-cache');
+    
+
+
     // Coming Soon Route
     Route::get('/coming-soon', function () {
         return view('coming-soon');
@@ -64,5 +75,7 @@ Route::get('/dashboard', function () {
 });
 
 require __DIR__.'/auth.php';
+
+
 
 

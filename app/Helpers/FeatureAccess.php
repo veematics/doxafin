@@ -19,17 +19,43 @@ class FeatureAccess
 
     public static function cacheUserPermissions($userId)
     {
-        $permissions = DB::table('feature_role')
-            ->join('role_user', 'feature_role.role_id', '=', 'role_user.role_id')
+        // Check if user has SA role
+        $isSA = DB::table('roles')
+            ->join('role_user', 'roles.id', '=', 'role_user.role_id')
             ->where('role_user.user_id', $userId)
-            ->get([
-                'feature_role.feature_id',
-                'feature_role.can_view',
-                'feature_role.can_create',
-                'feature_role.can_edit',
-                'feature_role.can_delete',
-                'feature_role.can_approve'
-            ])->groupBy('feature_id');
+            ->where('roles.name', 'SA')
+            ->exists();
+
+        if ($isSA) {
+            // Get all features and set full permissions
+            $permissions = DB::table('appfeatures')
+                ->select([
+                    'featureID as feature_id',
+                    DB::raw('1 as can_view'),
+                    DB::raw('1 as can_create'),
+                    DB::raw('1 as can_edit'),
+                    DB::raw('1 as can_delete'),
+                    DB::raw('1 as can_approve')
+                ])
+                ->get()
+                ->groupBy('feature_id');
+        } else {
+            // Regular permission calculation
+            $permissions = DB::table('feature_role')
+                ->join('role_user', 'feature_role.role_id', '=', 'role_user.role_id')
+                ->where('role_user.user_id', $userId)
+                ->select([
+                    'feature_role.feature_id',
+                    DB::raw('MIN(feature_role.can_view) as can_view'),
+                    DB::raw('MAX(CAST(feature_role.can_create AS SIGNED)) as can_create'),
+                    DB::raw('MAX(CAST(feature_role.can_edit AS SIGNED)) as can_edit'),
+                    DB::raw('MAX(CAST(feature_role.can_delete AS SIGNED)) as can_delete'),
+                    DB::raw('MAX(CAST(feature_role.can_approve AS SIGNED)) as can_approve')
+                ])
+                ->groupBy('feature_role.feature_id')
+                ->get()
+                ->groupBy('feature_id');
+        }
 
         Cache::put(self::getCacheKey($userId), $permissions, self::$cacheDuration);
         return $permissions;
@@ -115,5 +141,11 @@ class FeatureAccess
     public static function clearCache($userId)
     {
         Cache::forget(self::getCacheKey($userId));
+    }
+
+    public static function rebuildCache($userId)
+    {
+        self::clearCache($userId);
+        return self::cacheUserPermissions($userId);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\AppFeature;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Helpers\FeatureAccess;
 
 class RoleController extends Controller
 {
@@ -80,13 +81,12 @@ class RoleController extends Controller
     {
         // Your role update logic here
         
-        // Clear cache for all users with this role
+        // Rebuild cache for all users with this role
         $userIds = $role->users()->pluck('users.id');
         foreach ($userIds as $userId) {
-            FeatureAccess::clearCache($userId);
+            FeatureAccess::rebuildCache($userId);
         }
-    }
-    {
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
             'display_name' => 'required|string|max:255',
