@@ -14,7 +14,9 @@ export default defineConfig(({ command, mode }) => {
                     'resources/sass/app.scss',
                     'resources/css/custom.css',
                     'resources/js/app.js',
-                    'resources/js/nonapp.js'
+                    'resources/js/nonapp.js',
+                    'resources/js/inboxselect2.js',
+                    'resources/css/select2.css'
                 ],
                 refresh: true,
             }),
