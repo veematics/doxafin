@@ -3,17 +3,38 @@
     <!-- Remove select2.css reference as it's imported directly in JS -->
     <style>
         .select2-container .select2-selection--single {
-            border: 1px solid #DBDFE6;
+            border: 1px solid var(--cui-input-border-color, #DBDFE6);
             border-radius: 0.25rem;
-            height:37px !important;
-         
+            height: 37px !important;
+            background-color: var(--cui-input-bg, #fff);
+            color: var(--cui-input-color, #4f5d73);
         }
+        
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-           padding-top:3px;
-            
-        }</style>
-
-
+            padding-top: 3px;
+            color: var(--cui-input-color, #4f5d73);
+        }
+        
+        .select2-dropdown {
+            background-color: var(--cui-input-bg, #fff);
+            border-color: var(--cui-input-border-color, #DBDFE6);
+            color: var(--cui-input-color, #4f5d73);
+        }
+        
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: var(--cui-primary, #321fdb);
+            color: var(--cui-primary-color, #fff);
+        }
+        
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--cui-primary, #321fdb);
+            color: var(--cui-primary-color, #fff);
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: var(--cui-input-color, #4f5d73) transparent transparent transparent;
+        }
+    </style>
 
 @push('scripts')
     @vite(['resources/js/inboxselect2.js'])
@@ -30,18 +51,25 @@
                 window.toast.show('Reply sent successfully', 'success');
             }
             
-            // Initialize Select2 for search dropdowns
+            // Initialize Select2 for search dropdowns with theme support
             setTimeout(function() {
                 try {
                     $('.select2-filter').select2({
                         placeholder: 'Filter by {{ request()->routeIs("inbox.sent") ? "recipient" : "sender" }}...',
                         allowClear: true,
                         width: '100%',
-                        dropdownCssClass: 'select2-dropdown-light',
-                        minimumResultsForSearch: 0
+                        minimumResultsForSearch: 0,
+                        // Remove dropdownCssClass that was forcing light theme
+                    });
+                    
+                    // Initialize recipient select2 with theme support
+                    $('.select2-recipient').select2({
+                        placeholder: 'Select recipient...',
+                        width: '100%',
+                        dropdownParent: $('#sendMessageModal .modal-body')
                     });
                 } catch(e) {
-                    console.error('Error initializing sender/recipient Select2:', e);
+                    console.error('Error initializing Select2:', e);
                 }
             }, 500);
         });
@@ -101,7 +129,7 @@
             <div class="col-md-9">
                 <!-- Rest of the message list content remains the same -->
                 <div class="card mb-4">
-                    <div class="card-header bg-light">
+                    <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0">
                                 @if(isset($view_type) && $view_type == 'trash')
@@ -578,7 +606,7 @@
             // Create message HTML
             messageDiv.innerHTML = `
                 <div class="card ${isRoot ? 'border-primary' : ''}">
-                    <div class="card-header ${isRoot ? 'bg-light' : 'bg-light-subtle'}">
+                    <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>
                                 <strong>From:</strong> ${message.sender_name}
