@@ -3,19 +3,11 @@
         {{-- Previous Page Link --}}
         @if ($paginator->onFirstPage())
             <li class="page-item disabled">
-                <span class="page-link">
-                    <svg class="icon">
-                        <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-chevron-left"></use>
-                    </svg>
-                </span>
+                <span class="page-link" aria-hidden="true">&lsaquo;</span>
             </li>
         @else
             <li class="page-item">
-                <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">
-                    <svg class="icon">
-                        <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-chevron-left"></use>
-                    </svg>
-                </a>
+                <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">&lsaquo;</a>
             </li>
         @endif
 
@@ -23,22 +15,16 @@
         @foreach ($elements as $element)
             {{-- "Three Dots" Separator --}}
             @if (is_string($element))
-                <li class="page-item disabled">
-                    <span class="page-link">{{ $element }}</span>
-                </li>
+                <li class="page-item disabled"><span class="page-link">{{ $element }}</span></li>
             @endif
 
             {{-- Array Of Links --}}
             @if (is_array($element))
                 @foreach ($element as $page => $url)
                     @if ($page == $paginator->currentPage())
-                        <li class="page-item active">
-                            <span class="page-link">{{ $page }}</span>
-                        </li>
+                        <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
                     @else
-                        <li class="page-item">
-                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                        </li>
+                        <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
                     @endif
                 @endforeach
             @endif
@@ -47,19 +33,11 @@
         {{-- Next Page Link --}}
         @if ($paginator->hasMorePages())
             <li class="page-item">
-                <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">
-                    <svg class="icon">
-                        <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-chevron-right"></use>
-                    </svg>
-                </a>
+                <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">&rsaquo;</a>
             </li>
         @else
             <li class="page-item disabled">
-                <span class="page-link">
-                    <svg class="icon">
-                        <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-chevron-right"></use>
-                    </svg>
-                </span>
+                <span class="page-link" aria-hidden="true">&rsaquo;</span>
             </li>
         @endif
     </ul>

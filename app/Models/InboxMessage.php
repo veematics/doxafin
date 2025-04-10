@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes; // Add this if using soft deletes
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InboxMessage extends Model
 {
@@ -14,13 +14,18 @@ class InboxMessage extends Model
     // use SoftDeletes; // Uncomment this if using soft deletes in migration
 
     protected $fillable = [
+        'sent_to',
         'subject',
         'message',
+        'priority_status',
+        'message_category', // Add this line
+        'sent_from',
         'message_parent_id',
         'is_read',
         'priority_status',
         'sent_from',
         'sent_to',
+        'deleted_at'
     ];
 
     protected $casts = [

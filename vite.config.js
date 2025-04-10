@@ -21,6 +21,9 @@ export default defineConfig(({ command, mode }) => {
                 refresh: true,
             }),
         ],
+        optimizeDeps: {
+            include: ['jquery', 'select2']
+        },
         server: {
             host: host,
             hmr: {
@@ -31,6 +34,7 @@ export default defineConfig(({ command, mode }) => {
                 usePolling: true,
             },
             cors: true,
+            origin: `http://${host}:5173`,
         },
     };
 });

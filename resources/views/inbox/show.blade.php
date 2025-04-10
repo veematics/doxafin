@@ -1,75 +1,69 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container-lg px-4">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">{{ $message->subject }}</h5>
-            @if ($message->canBeDeleted())
-                <form action="{{ route('inbox.destroy', $message) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm" 
-                            onclick="return confirm('Are you sure you want to delete this message?')">
-                        Delete
-                    </button>
-                </form>
-            @endif
-        </div>
-        <div class="card-body">
-            <div class="mb-4">
-                <div class="d-flex justify-content-between mb-3">
-                    <div>
-                        <strong>From:</strong> 
-                        {{ $message->isSystemMessage() ? 'System' : $message->sender->name }}
+<x-app-layout>
+    <div class="body flex-grow-1 px-3">
+        <div class="container-lg">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h4 font-weight-bold mb-0">
+                            Message Details
+                        </h2>
+                        <a href="{{ route('inbox.index') }}" class="btn btn-outline-secondary">
+                            <svg class="icon me-2">
+                                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-arrow-left"></use>
+                            </svg> Back to Inbox
+                        </a>
                     </div>
-                    <div>
-                        <small class="text-body-secondary">
-                            {{ $message->created_at->format('M d, Y H:i') }}
-                        </small>
-                    </div>
-                </div>
-                <div class="message-content">
-                    {!! nl2br(e($message->message)) !!}
                 </div>
             </div>
 
-            @if ($message->canBeRepliedTo())
-                <div class="reply-form mt-4">
-                    <h6>Reply</h6>
-                    <form action="{{ route('inbox.reply', $message) }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <textarea name="message" rows="3" class="form-control @error('message') is-invalid @enderror" 
-                                    placeholder="Type your reply..."></textarea>
-                            @error('message')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">{{ $message->subject }}</h5>
                         </div>
-                        <button type="submit" class="btn btn-primary">Send Reply</button>
-                    </form>
-                </div>
-            @endif
-
-            @if ($message->replies->count() > 0)
-                <div class="replies mt-4">
-                    <h6>Previous Replies</h6>
-                    @foreach ($message->replies as $reply)
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <small><strong>{{ $reply->sender->name }}</strong></small>
-                                    <small class="text-body-secondary">
-                                        {{ $reply->created_at->format('M d, Y H:i') }}
-                                    </small>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div>
+                                    <strong>From:</strong> {{ $message->sender ? $message->sender->name : 'System' }}
                                 </div>
-                                <p class="mb-0">{!! nl2br(e($reply->message)) !!}</p>
+                                <div>
+                                    <small class="text-muted">{{ $message->created_at->format('M d, Y h:i A') }}</small>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="mb-4">
+                                <p>{!! nl2br(e($message->message)) !!}</p>
+                            </div>
+                            <div class="d-flex">
+                                <span class="badge me-2 
+                                    @if($message->priority_status == 3)
+                                        bg-danger
+                                    @elseif($message->priority_status == 2)
+                                        bg-warning text-dark
+                                    @else
+                                        bg-secondary
+                                    @endif">
+                                    @if($message->priority_status == 3)
+                                        High Priority
+                                    @elseif($message->priority_status == 2)
+                                        Need Attention
+                                    @else
+                                        Normal
+                                    @endif
+                                </span>
+                                <span class="badge bg-info">
+                                    {{ ucfirst($message->message_category) }}
+                                </span>
                             </div>
                         </div>
-                    @endforeach
+                        <div class="card-footer d-flex justify-content-end">
+                            <a href="{{ route('inbox.index') }}" class="btn btn-secondary me-2">Back</a>
+                            <a href="{{ route('inbox.reply.form', $message->id) }}" class="btn btn-primary">Reply</a>
+                        </div>
+                    </div>
                 </div>
-            @endif
+            </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

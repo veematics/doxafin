@@ -78,10 +78,24 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth'])->group(function () {
     // Inbox routes
     Route::prefix('inbox')->name('inbox.')->group(function () {
+        // Place specific routes BEFORE wildcard routes
         Route::get('/', [InboxMessageController::class, 'index'])->name('index');
         Route::get('/sent', [InboxMessageController::class, 'sent'])->name('sent');
+        Route::get('/trash', [InboxMessageController::class, 'trash'])->name('trash');
         Route::post('/store', [InboxMessageController::class, 'store'])->name('store');
+        
+        // Then place wildcard routes
         Route::get('/{message}', [InboxMessageController::class, 'show'])->name('show');
+        Route::post('/{message}/trash', [InboxMessageController::class, 'moveToTrash'])->name('move-to-trash');
+        Route::get('/{message}/reply', [InboxMessageController::class, 'replyForm'])->name('reply.form');
+        Route::post('/{message}/reply', [InboxMessageController::class, 'reply'])->name('reply');
+        Route::get('/{message}/thread', [InboxMessageController::class, 'thread'])->name('thread');
+        
+        // Add recover route
+        Route::post('/{message}/recover', [InboxMessageController::class, 'recoverMessage'])
+            ->name('recover');
+        // Fix this route - removing the duplicate 'inbox/' prefix
+        Route::post('/{message}/mark-as-read', [InboxMessageController::class, 'markAsRead'])->name('mark-as-read');
     });
 });
 
