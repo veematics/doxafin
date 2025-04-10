@@ -8,6 +8,7 @@ use App\Http\Controllers\AppSetupController;
 use App\Http\Controllers\RoleController;  // Add this line
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\InboxMessageController;
 
 Route::get('/', [WelcomeController::class, 'index'])
     ->middleware('guest')
@@ -72,6 +73,16 @@ Route::get('/dashboard', function () {
     });
 
 
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Inbox routes
+    Route::prefix('inbox')->name('inbox.')->group(function () {
+        Route::get('/', [InboxMessageController::class, 'index'])->name('index');
+        Route::get('/sent', [InboxMessageController::class, 'sent'])->name('sent');
+        Route::post('/store', [InboxMessageController::class, 'store'])->name('store');
+        Route::get('/{message}', [InboxMessageController::class, 'show'])->name('show');
+    });
 });
 
 require __DIR__.'/auth.php';

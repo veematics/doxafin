@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', initSidebarHandler);
 
 // Toast notification implementation
 window.toast = {
-    show: function(message, type = 'info') {
+    show: function(message, type = 'info', timer = 2000) {
         const toastContainer = document.getElementById('toast-container');
         if (!toastContainer) {
             const container = document.createElement('div');
@@ -29,6 +29,7 @@ window.toast = {
         toastElement.setAttribute('role', 'alert');
         toastElement.setAttribute('aria-live', 'assertive');
         toastElement.setAttribute('aria-atomic', 'true');
+        toastElement.setAttribute('data-coreui-delay', timer);
 
         toastElement.innerHTML = `
             <div class="d-flex">
@@ -41,7 +42,9 @@ window.toast = {
 
         document.getElementById('toast-container').appendChild(toastElement);
 
-        const toast = new coreui.Toast(toastElement);
+        const toast = new coreui.Toast(toastElement, {
+            delay: timer
+        });
         toast.show();
 
         // Remove toast after it's hidden

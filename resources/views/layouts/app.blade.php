@@ -77,14 +77,8 @@
               <svg class="icon">
                 <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-list"></use>
               </svg></a></li>
-          <li class="nav-item"><a class="nav-link" data-coreui-toggle="tab" href="#messages" role="tab">
-              <svg class="icon">
-                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-speech"></use>
-              </svg></a></li>
-          <li class="nav-item"><a class="nav-link" data-coreui-toggle="tab" href="#settings" role="tab">
-              <svg class="icon">
-                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-settings"></use>
-              </svg></a></li>
+
+
         </ul>
         <button class="btn-close position-absolute top-50 end-0 translate-middle my-0" type="button" aria-label="Close" onclick="coreui.Sidebar.getInstance(document.querySelector('#aside')).toggle()"></button>
       </div>
@@ -159,106 +153,8 @@
             </div>
           </div>
         </div>
-        <div class="tab-pane p-3" id="messages" role="tabpanel">
-          <div class="message">
-            <div class="py-3 pb-5 me-3 float-start">
-              <div class="avatar"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-            </div>
-            <div><small class="text-body-secondary">Lukasz Holeczek</small><small class="text-body-secondary float-end mt-1">1:52 PM</small></div>
-            <div class="text-truncate fw-bold">Lorem ipsum dolor sit amet</div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-          </div>
-          <hr>
-          <div class="message">
-            <div class="py-3 pb-5 me-3 float-start">
-              <div class="avatar"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-            </div>
-            <div><small class="text-body-secondary">Lukasz Holeczek</small><small class="text-body-secondary float-end mt-1">1:52 PM</small></div>
-            <div class="text-truncate fw-bold">Lorem ipsum dolor sit amet</div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-          </div>
-          <hr>
-          <div class="message">
-            <div class="py-3 pb-5 me-3 float-start">
-              <div class="avatar"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-            </div>
-            <div><small class="text-body-secondary">Lukasz Holeczek</small><small class="text-body-secondary float-end mt-1">1:52 PM</small></div>
-            <div class="text-truncate fw-bold">Lorem ipsum dolor sit amet</div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-          </div>
-          <hr>
-          <div class="message">
-            <div class="py-3 pb-5 me-3 float-start">
-              <div class="avatar"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-            </div>
-            <div><small class="text-body-secondary">Lukasz Holeczek</small><small class="text-body-secondary float-end mt-1">1:52 PM</small></div>
-            <div class="text-truncate fw-bold">Lorem ipsum dolor sit amet</div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-          </div>
-          <hr>
-          <div class="message">
-            <div class="py-3 pb-5 me-3 float-start">
-              <div class="avatar"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-            </div>
-            <div><small class="text-body-secondary">Lukasz Holeczek</small><small class="text-body-secondary float-end mt-1">1:52 PM</small></div>
-            <div class="text-truncate fw-bold">Lorem ipsum dolor sit amet</div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-          </div>
-        </div>
-        <div class="tab-pane p-3" id="settings" role="tabpanel">
-          <h6 data-coreui-i18n="settings">Settings</h6>
-          <div class="aside-options">
-            <div class="clearfix mt-4">
-              <div class="form-check form-switch form-switch-lg">
-                <input class="form-check-input me-0" id="settingOption1" type="checkbox" checked>
-                <label class="form-check-label fw-semibold small" for="settingOption1">Option 1</label>
-              </div>
-            </div>
-            <div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</small></div>
-          </div>
-          <div class="aside-options">
-            <div class="clearfix mt-3">
-              <div class="form-check form-switch form-switch-lg">
-                <input class="form-check-input me-0" id="settingOption2" type="checkbox">
-                <label class="form-check-label fw-semibold small" for="settingOption2">Option 2</label>
-              </div>
-            </div>
-            <div><small class="text-body-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</small></div>
-          </div>
-          <div class="aside-options">
-            <div class="clearfix mt-3">
-              <div class="form-check form-switch form-switch-lg">
-                <input class="form-check-input me-0" id="settingOption3" type="checkbox">
-                <label class="form-check-label fw-semibold small" for="settingOption3">Option 3</label>
-              </div>
-            </div>
-          </div>
-          <div class="aside-options">
-            <div class="clearfix mt-3">
-              <div class="form-check form-switch form-switch-lg">
-                <input class="form-check-input me-0" id="settingOption4" type="checkbox" checked>
-                <label class="form-check-label fw-semibold small" for="settingOption4">Option 4</label>
-              </div>
-            </div>
-          </div>
-          <hr>
-          <h6 data-coreui-i18n="systemUtilization">System Utilization</h6>
-          <div class="small text-uppercase fw-semibold mb-1 mt-4" data-coreui-i18n="cpuUsage">CPU Usage</div>
-          <div class="progress progress-thin">
-            <div class="progress-bar bg-info" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="small text-body-secondary" data-coreui-i18n="cpuUsageDescription, { 'number_of_processes': 358, 'number_of_cores': '1/4' }">348 Processes. 1/4 Cores.</div>
-          <div class="small text-uppercase fw-semibold mb-1 mt-2" data-coreui-i18n="memoryUsage">Memory Usage</div>
-          <div class="progress progress-thin">
-            <div class="progress-bar bg-warning" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="small text-body-secondary">11444GB/16384MB</div>
-          <div class="small text-uppercase fw-semibold mb-1 mt-2" data-coreui-i18n="ssdUsage">SSD Usage</div>
-          <div class="progress progress-thin">
-            <div class="progress-bar bg-danger" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="small text-body-secondary">243GB/256GB</div>
-          <div class="small text-uppercase fw-semibold mb-1 mt-2" data-coreui-i18n="ssdUsage">SSD Usage</div>
-          <div class="progress progress-thin">
-            <div class="progress-bar bg-success" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="small text-body-secondary">25GB/256GB</div>
-        </div>
+ 
+
       </div>
     </div>
     <div class="wrapper d-flex flex-column min-vh-100">
@@ -310,103 +206,7 @@
                   <div class="small text-body-secondary">243GB/256GB</div></a>
               </div>
             </li>
-            <li class="nav-item dropdown"><a class="nav-link" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><span class="d-inline-block my-1 mx-2 position-relative">
-                  <svg class="icon icon-lg">
-                    <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-list-rich"></use>
-                  </svg><span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle"><span class="visually-hidden">New alerts</span></span></span></a>
-              <div class="dropdown-menu dropdown-menu-end dropdown-menu-lg py-0">
-                <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold rounded-top mb-2" data-coreui-i18n="taskCounter, { 'counter': 5 }">You have 5 pending tasks</div><a class="dropdown-item d-block" href="#">
-                  <div class="small mb-1">Upgrade NPM
-                    <div class="fw-semibold">0%</div>
-                  </div><span class="progress progress-thin">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></span></a><a class="dropdown-item d-block py-2" href="#">
-                  <div class="d-flex justify-content-between mb-1">
-                    <div class="small">ReactJS Version</div>
-                    <div class="fw-semibold">25%</div>
-                  </div><span class="progress progress-thin">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div></span></a><a class="dropdown-item d-block py-2" href="#">
-                  <div class="d-flex justify-content-between mb-1">
-                    <div class="small">VueJS Version</div>
-                    <div class="fw-semibold">50%</div>
-                  </div><span class="progress progress-thin">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div></span></a><a class="dropdown-item d-block py-2" href="#">
-                  <div class="d-flex justify-content-between mb-1">
-                    <div class="small">Add new layouts</div>
-                    <div class="fw-semibold">75%</div>
-                  </div><span class="progress progress-thin">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div></span></a><a class="dropdown-item d-block py-2" href="#">
-                  <div class="d-flex justify-content-between mb-1">
-                    <div class="small">Angular Version</div>
-                    <div class="fw-semibold">100%</div>
-                  </div><span class="progress progress-thin">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div></span></a>
-                <div class="p-2"><a class="btn btn-outline-primary w-100" href="#" data-coreui-i18n="viewAllTasks">View all tasks</a></div>
-              </div>
-            </li>
-            <li class="nav-item dropdown"><a class="nav-link" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><span class="d-inline-block my-1 mx-2 position-relative">
-                  <svg class="icon icon-lg">
-                    <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-envelope-open"></use>
-                  </svg><span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle"><span class="visually-hidden">New alerts</span></span></span></a>
-              <div class="dropdown-menu dropdown-menu-end dropdown-menu-lg py-0" style="min-width: 24rem">
-                <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold rounded-top mb-2" data-coreui-i18n="messagesCounter, { 'counter': 7 }">You have 4 messages</div><a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="avatar flex-shrink-0 my-3 me-3"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-                    <div class="message text-wrap">
-                      <div class="d-flex justify-content-between mt-1">
-                        <div class="small text-body-secondary">Jessica Williams</div>
-                        <div class="small text-body-secondary">Just now</div>
-                      </div>
-                      <div class="fw-semibold"><span class="text-danger">! </span>Urgent: System Maintenance Tonight</div>
-                      <div class="small text-body-secondary">Attention team, we'll be conducting critical system maintenance tonight from 10 PM to 2 AM. Plan accordingly...</div>
-                    </div>
-                  </div></a><a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="avatar flex-shrink-0 my-3 me-3"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-warning"></span></div>
-                    <div class="message text-wrap">
-                      <div class="d-flex justify-content-between mt-1">
-                        <div class="small text-body-secondary">Richard Johnson</div>
-                        <div class="small text-body-secondary">5 minutes ago</div>
-                      </div>
-                      <div class="fw-semibold"><span class="text-danger">! </span>Project Update: Milestone Achieved</div>
-                      <div class="small text-body-secondary">Kudos on hitting sales targets last quarter! Let's keep the momentum. New goals, new victories ahead...</div>
-                    </div>
-                  </div></a><a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="avatar flex-shrink-0 my-3 me-3"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-secondary"></span></div>
-                    <div class="message text-wrap">
-                      <div class="d-flex justify-content-between mt-1">
-                        <div class="small text-body-secondary">Angela Rodriguez</div>
-                        <div class="small text-body-secondary">1:52 PM</div>
-                      </div>
-                      <div class="fw-semibold">Social Media Campaign Launch</div>
-                      <div class="small text-body-secondary">Exciting news! Our new social media campaign goes live tomorrow. Brace yourselves for engagement...</div>
-                    </div>
-                  </div></a><a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="avatar flex-shrink-0 my-3 me-3"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-success"></span></div>
-                    <div class="message text-wrap">
-                      <div class="d-flex justify-content-between mt-1">
-                        <div class="small text-body-secondary">Jane Lewis</div>
-                        <div class="small text-body-secondary">4:03 PM</div>
-                      </div>
-                      <div class="fw-semibold">Inventory Checkpoint</div>
-                      <div class="small text-body-secondary">Team, it's time for our monthly inventory check. Accurate counts ensure smooth operations. Let's nail it...</div>
-                    </div>
-                  </div></a><a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="avatar flex-shrink-0 my-3 me-3"><img class="avatar-img" src="images/avatars/avatar-default.svg" alt="user@email.com"><span class="avatar-status bg-secondary"></span></div>
-                    <div class="message text-wrap">
-                      <div class="d-flex justify-content-between mt-1">
-                        <div class="small text-body-secondary">Ryan Miller</div>
-                        <div class="small text-body-secondary">3 days ago</div>
-                      </div>
-                      <div class="fw-semibold">Customer Feedback Results</div>
-                      <div class="small text-body-secondary">Our latest customer feedback is in. Let's analyze and discuss improvements for an even better service...</div>
-                    </div>
-                  </div></a>
-                <div class="p-2">     <a class="btn btn-outline-primary w-100" href="#" data-coreui-i18n="viewAllMessages">View all messages</a></div>
-              </div>
-            </li>
+         
           </ul>
           <ul class="header-nav ms-auto ms-md-0">
             <li class="nav-item py-1">
