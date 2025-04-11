@@ -103,7 +103,7 @@
                                                                     <input class="form-check-input" type="radio" 
                                                                            name="permissions[{{ $feature->featureID }}][can_view]" 
                                                                            id="view_none_{{ $feature->featureID }}"
-                                                                           value="4">
+                                                                           value="0">
                                                                     <label class="form-check-label" for="view_none_{{ $feature->featureID }}">
                                                                          No View
                                                                     </label>

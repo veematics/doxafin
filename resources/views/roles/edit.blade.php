@@ -102,8 +102,8 @@
                                                             <input class="form-check-input" type="radio" 
                                                                    name="permissions[{{ $feature->featureID }}][can_view]" 
                                                                    id="view_none_{{ $feature->featureID }}"
-                                                                   value="4"
-                                                                   {{ $pivotData && $pivotData->can_view == 4 ? 'checked' : '' }}>
+                                                                   value="0"
+                                                                   {{ $pivotData && $pivotData->can_view == 0 ? 'checked' : '' }}>
                                                             <label class="form-check-label" for="view_none_{{ $feature->featureID }}">
                                                                 No View
                                                             </label>

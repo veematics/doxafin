@@ -1,4 +1,55 @@
 <x-app-layout>
+    @php
+
+ 
+    
+    // Get route parameters
+    $routeParams = request()->route()->parameters();
+    $message = $routeParams['message'] ?? null;
+    $messageId = $message ? $message->id : null;
+  
+     $readCheckpoint = App\Models\InboxMessage::where('id', $messageId)
+                  ->first();
+       // Authorization check
+       if ($readCheckpoint && ($readCheckpoint->sent_from !== Auth::id() && $readCheckpoint->sent_to !== Auth::id())) {
+        // Log unauthorized access attempt
+        \Log::warning('Unauthorized inbox access attempt', [
+            'user_id' => Auth::id(),
+            'message_id' => $messageId,
+            'ip' => request()->ip()
+        ]);
+        
+        // Create a custom response
+        $response = response()->make(
+            view('errors.403', [
+                'message' => "You're not allowed to access this page, we've logged this action for security audit"
+            ]),
+            403
+        );
+        
+        // Send the response immediately
+        $response->send();
+        exit;
+    }
+     if ($readCheckpoint) {
+        // Debug output
+        //echo "Debug - Message ID: " . $readCheckpoint->id . ", Is Read: " . $readCheckpoint->getRawOriginal('is_read') . "<br>";
+        
+        // Update read status if message is unread
+        if ($readCheckpoint->getRawOriginal('is_read') === 0 && $readCheckpoint->sent_from !== Auth::id()) {
+            $readCheckpoint->is_read = 1;
+            $readCheckpoint->save();
+
+            // This will now work since keys match
+            Cache::forget('AlertNotification_' . Auth::id());
+            Cache::forget('last_inbox_messages_' . Auth::id());
+
+        }
+     } else {
+         echo "Debug - No message found with ID: " . request()->route('id') . "<br>";
+    }
+    @endphp
+
     <div class="body flex-grow-1 px-3">
         <div class="container-lg">
             <div class="row mb-4">
