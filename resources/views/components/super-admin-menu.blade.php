@@ -1,3 +1,4 @@
+@if(auth()->check() && auth()->user()->hasRole('SA'))
 <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold my-2" data-coreui-i18n="superadmin">Super Admin</div>
 @foreach($menuItems as $menuItem)
     <a class="dropdown-item" href="{{ url($menuItem->path) }}">
@@ -7,3 +8,4 @@
         <span data-coreui-i18n="{{ Str::lower(str_replace(' ', '', $menuItem->title)) }}">{{ $menuItem->title }}</span>
     </a>
 @endforeach
+@endif
