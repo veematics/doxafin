@@ -80,7 +80,7 @@
                                                                 <input class="form-check-input" type="radio" 
                                                                        name="permissions[{{ $feature->featureID }}][can_view]" 
                                                                        id="view_all_{{ $feature->featureID }}"
-                                                                       value="1">
+                                                                       value="1" checked>
                                                                 <label class="form-check-label" for="view_all_{{ $feature->featureID }}">
                                                                      Global
                                                                 </label>
