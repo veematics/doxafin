@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -17,7 +18,8 @@ class UserManagementController extends Controller
 
     public function create()
     {
-        return view('appsetting.users.create');
+        $roles = Role::orderBy('name')->get();
+        return view('appsetting.users.create', compact('roles'));
     }
 
     public function store(Request $request)
@@ -40,7 +42,8 @@ class UserManagementController extends Controller
 
     public function edit(User $user)
     {
-        return view('appsetting.users.edit', compact('user'));
+        $roles = Role::orderBy('name')->get();
+        return view('appsetting.users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user)
