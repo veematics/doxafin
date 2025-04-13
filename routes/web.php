@@ -9,6 +9,8 @@ use App\Http\Controllers\RoleController;  // Add this line
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\InboxMessageController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ContactController;
 
 Route::get('/', [WelcomeController::class, 'index'])
     ->middleware('guest')
@@ -47,6 +49,9 @@ Route::get('/dashboard', function () {
         Route::resource('users', UserManagementController::class)->except(['show']);
         Route::post('users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
              ->name('users.toggle-status');
+        
+        // Remove this duplicate route
+        // Route::resource('users', \App\Http\Controllers\Appsetting\UserController::class);
         
         // Features Management Routes
         Route::resource('appfeature', AppFeatureController::class)->except(['show']);
@@ -97,8 +102,43 @@ Route::middleware(['auth'])->group(function () {
         // Fix this route - removing the duplicate 'inbox/' prefix
         Route::post('/{message}/mark-as-read', [InboxMessageController::class, 'markAsRead'])->name('mark-as-read');
     });
+
+    
+    
+    // Client routes
+    Route::prefix('clients')->name('clients.')->group(function () {
+        // Base client routes
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::get('/create', [ClientController::class, 'create'])->name('create');
+        Route::post('/', [ClientController::class, 'store'])->name('store');
+
+        // Independent contact creation route
+        Route::get('/contacts/create', [ContactController::class, 'createIndependent'])->name('contacts.create-independent');
+        Route::post('/contacts', [ContactController::class, 'storeIndependent'])->name('contacts.store-independent');
+        
+        // Nested client and contact routes
+        Route::prefix('{client}')->group(function () {
+            Route::get('/contacts/create', [ContactController::class, 'create'])->name('contacts.create');
+            Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
+            Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
+            Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update');
+            Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
+            Route::patch('/contacts/{contact}/make-primary', [ContactController::class, 'makePrimary'])
+                ->name('contacts.make-primary');
+                
+            // Client-specific routes
+            Route::get('/edit', [ClientController::class, 'edit'])->name('edit');
+            Route::put('/', [ClientController::class, 'update'])->name('update');
+            Route::get('/', [ClientController::class, 'show'])->name('show');
+        });
+    });
+  
 });
 
+// Remove this duplicate route group
+// Route::prefix('appsetting')->name('appsetting.')->group(function () {
+//     Route::resource('users', \App\Http\Controllers\Appsetting\UserController::class);
+// });
 require __DIR__.'/auth.php';
 
 

@@ -4,8 +4,8 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     const host = env.APP_ENV === 'production' 
-        ? env.VITE_HOST_PRODUCTION 
-        : env.VITE_HOST_LOCAL;
+        ? (env.VITE_HOST_PRODUCTION || 'localhost')
+        : (env.VITE_HOST_LOCAL || 'localhost');
 
     return {
         plugins: [
@@ -16,6 +16,7 @@ export default defineConfig(({ command, mode }) => {
                     'resources/js/app.js',
                     'resources/js/nonapp.js',
                     'resources/js/inboxselect2.js',
+                    'resources/js/clientselect2.js',
                     'resources/css/select2.css'
                 ],
                 refresh: true,
