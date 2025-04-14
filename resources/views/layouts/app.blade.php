@@ -71,7 +71,7 @@
          
 
       </ul>
-      <x-debug-info />
+
     </div>
 
     <!-- ... rest of the content remains unchanged ... -->

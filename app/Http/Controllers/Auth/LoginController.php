@@ -47,9 +47,14 @@ class LoginController extends Controller
         });
     }
 
-    protected function loggedOut()
+    public function logout(Request $request)
     {
-        Cache::forget('sidebar_menu_items');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        Cache::forget('sidebar_menus');
+    
         return redirect('/');
     }
 }

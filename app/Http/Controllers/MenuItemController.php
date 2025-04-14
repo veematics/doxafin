@@ -7,9 +7,16 @@ use App\Models\MenuItem;
 use App\Models\AppFeature;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
 
 class MenuItemController extends Controller
 {
+    private function rebuildMenuCache()
+    {
+        $menus = Menu::with('menuItems.appFeature')->get();
+        Cache::put('sidebar_menus', $menus, now()->addDay());
+    }
+
     public function store(Request $request, Menu $menu)
     {
         $validated = $request->validate([
@@ -37,7 +44,8 @@ class MenuItemController extends Controller
         
         $menuItem = $menu->menuItems()->create($validated);
 
-        // Return the created item with its relationships
+        $this->rebuildMenuCache();
+
         return response()->json([
             'message' => 'Menu item created successfully',
             'item' => $menuItem->load(['appFeature'])
@@ -61,6 +69,8 @@ class MenuItemController extends Controller
 
         $menuItem->update($validated);
 
+        $this->rebuildMenuCache();
+
         return response()->json([
             'message' => 'Menu item updated successfully',
             'item' => $menuItem->fresh(['appFeature'])
@@ -70,7 +80,9 @@ class MenuItemController extends Controller
     public function destroy(MenuItem $menuItem)
     {
         try {
-            $menuItem->delete(); // Will cascade delete children due to foreign key constraint
+            $menuItem->delete();
+
+            $this->rebuildMenuCache();
 
             return response()->json([
                 'message' => 'Menu item deleted successfully'

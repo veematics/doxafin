@@ -3,10 +3,10 @@
 namespace App\View\Components;
 
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
-use App\Models\Menu;
-use App\Helpers\FeatureAccess;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 class SidebarMenu extends Component
 {
@@ -14,75 +14,45 @@ class SidebarMenu extends Component
 
     public function __construct()
     {
-        // Force clear cache for debugging
-        Cache::forget('sidebar_menu_items');
+        $userId = Auth::id();
+        $noCache = Request::get('no_cache') == 1;
 
-        $this->menuItems = Cache::rememberForever('sidebar_menu_items', function () {
-            $items = Menu::where('name', 'Sidebar Menu')
-                ->with(['menuItems' => function ($query) {
-                    $query->orderBy('order')
-                        ->with(['children' => function ($q) {
-                            $q->orderBy('order');
-                        }]);
-                }])
-                ->first()
-                ->menuItems()
-                ->whereNull('parent_id')
+        if ($noCache) {
+            $this->menuItems = $this->getSidebarMenuItems();
+            Cache::put("sidebar_menu_items.{$userId}", $this->menuItems, now()->addDay());
+        } else {
+            $this->menuItems = Cache::remember("sidebar_menu_items.{$userId}", now()->addDay(), function () {
+                return $this->getSidebarMenuItems();
+            });
+        }
+    }
+
+    private function getSidebarMenuItems()
+    {
+        // Get parent menu items for Sidebar Menu
+        $menuItems = DB::table('menus')
+            ->join('menu_items', 'menus.id', '=', 'menu_items.menu_id')
+            ->where('menus.name', '=', 'Sidebar Menu')
+            ->whereNull('menu_items.parent_id')
+            ->select('menu_items.*')
+            ->orderBy('menu_items.order')
+            ->get();
+
+        return $menuItems->map(function ($item) {
+            // Get child menu items for each parent
+            $children = DB::table('menu_items')
+                ->where('parent_id', $item->id)
                 ->orderBy('order')
                 ->get();
 
-            // Add debug output for filtering
-            foreach ($items as $item) {
-                Log::info("Filtering menu item:", [
-                    'item_id' => $item->id,
-                    'feature_id' => $item->app_feature_id,
-                    'has_permission' => $this->checkMenuPermission($item)
-                ]);
-            }
-
-            // Filter items based on permissions
-            return $items->filter(function ($item) {
-                $hasPermission = $this->checkMenuPermission($item);
-                
-                if ($item->children->count() > 0) {
-                    // Filter children and remove parent if no visible children
-                    $item->children = $item->children->filter(function ($child) {
-                        $childPermission = $this->checkMenuPermission($child);
-                        Log::info("Filtering child menu item:", [
-                            'child_id' => $child->id,
-                            'feature_id' => $child->app_feature_id,
-                            'has_permission' => $childPermission
-                        ]);
-                        return $childPermission;
-                    });
-                    
-                    // Return true only if parent has permission or has visible children
-                    return $hasPermission || $item->children->count() > 0;
-                }
-                
-                return $hasPermission;
-            });
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'path' => $item->path,
+                'icon' => $item->icon,
+                'children' => $children
+            ];
         });
-    }
-
-    protected function checkMenuPermission($menuItem)
-    {
-        if (!$menuItem->app_feature_id) {
-            return true;
-        }
-
-        $featureId = $menuItem->app_feature_id;
-        $userId = auth()->id();
-        
-        // Get all roles and check if any role has permission
-        $roles = auth()->user()->roles()->pluck('name')->toArray();
-        foreach ($roles as $role) {
-            if (FeatureAccess::canViewById($userId, $featureId)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public function render()
