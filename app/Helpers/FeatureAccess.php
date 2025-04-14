@@ -155,10 +155,30 @@ class FeatureAccess
     {
         // Get feature ID by name
         $featureId = Cache::remember('feature_id_' . $featureName, 3600, function () use ($featureName) {
-            return AppFeature::where('featureName', $featureName)->value('featureID');
+            $feature = AppFeature::where('featureName', $featureName)->first();
+            
+            // If feature doesn't exist, try to create it 
+            if (!$feature && auth()->user() && auth()->user()->hasRole('SA')) {
+                // Create feature for system admin only
+                $feature = AppFeature::create([
+                    'featureName' => $featureName,
+                    'displayName' => ucwords(str_replace('_', ' ', $featureName)),
+                    'featureIcon' => 'fa-file-text',
+                    'featurePath' => 'csv-data', // Updated path without leading slash
+                    'url' => '/csv-data', // Updated URL
+                    'status' => 1,
+                    'parentID' => 0
+                ]);
+            }
+            
+            return $feature ? $feature->featureID : null;
         });
     
         if (!$featureId) {
+            // For system administrators, allow access even if feature doesn't exist
+            if (auth()->user() && auth()->user()->hasRole('SA')) {
+                return $permission === 'can_view' ? 1 : true;
+            }
             return false;
         }
     
@@ -166,10 +186,19 @@ class FeatureAccess
         $permissions = self::getUserPermissions($userId);
     
         if (!isset($permissions[$featureId])) {
+            // For system administrators, allow access even if permissions aren't set
+            if (auth()->user() && auth()->user()->hasRole('SA')) {
+                return $permission === 'can_view' ? 1 : true;
+            }
             return false;
         }
-    
-        // Check the specific permission (can_create, can_edit, etc.)
-        return $permissions[$featureId]->first()->$permission;
+
+        // For can_view, return the actual value (1, 2, or 3)
+        if ($permission === 'can_view') {
+            return $permissions[$featureId]->first()->can_view;
+        }
+        
+        // For other permissions, return boolean
+        return (bool) $permissions[$featureId]->first()->$permission;
     }
 }
