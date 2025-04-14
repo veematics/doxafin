@@ -11,11 +11,7 @@ use Illuminate\Support\Facades\Cache;
 
 class MenuItemController extends Controller
 {
-    private function rebuildMenuCache()
-    {
-        $menus = Menu::with('menuItems.appFeature')->get();
-        Cache::put('sidebar_menus', $menus, now()->addDay());
-    }
+
 
     public function store(Request $request, Menu $menu)
     {
@@ -44,7 +40,7 @@ class MenuItemController extends Controller
         
         $menuItem = $menu->menuItems()->create($validated);
 
-        $this->rebuildMenuCache();
+  
 
         return response()->json([
             'message' => 'Menu item created successfully',
@@ -69,7 +65,7 @@ class MenuItemController extends Controller
 
         $menuItem->update($validated);
 
-        $this->rebuildMenuCache();
+
 
         return response()->json([
             'message' => 'Menu item updated successfully',
@@ -82,7 +78,7 @@ class MenuItemController extends Controller
         try {
             $menuItem->delete();
 
-            $this->rebuildMenuCache();
+    
 
             return response()->json([
                 'message' => 'Menu item deleted successfully'

@@ -29,22 +29,7 @@ class LoginController extends Controller
         // Rebuild user permissions cache
         FeatureAccess::rebuildCache(auth()->id());
 
-        // Clear and rebuild sidebar menu cache
-        Cache::forget('sidebar_menu_items');
-        Cache::rememberForever('sidebar_menu_items', function () {
-            return Menu::where('name', 'Sidebar Menu')
-                ->with(['menuItems' => function ($query) {
-                    $query->orderBy('order')
-                        ->with(['children' => function ($q) {
-                            $q->orderBy('order');
-                        }]);
-                }])
-                ->first()
-                ->menuItems()
-                ->whereNull('parent_id')
-                ->orderBy('order')
-                ->get();
-        });
+   
     }
 
     public function logout(Request $request)
@@ -53,7 +38,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        Cache::forget('sidebar_menus');
+     
     
         return redirect('/');
     }
