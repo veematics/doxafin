@@ -3,51 +3,42 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
-class RolesTableSeeder extends Seeder
+class RoleSeeder extends Seeder
 {
-
     /**
-     * Auto generated seed file
-     *
-     * @return void
+     * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
-        
-
-        \DB::table('roles')->delete();
-        
-        \DB::table('roles')->insert(array (
-            0 => 
-            array (
+        $roles = [
+            [
                 'id' => 1,
                 'name' => 'AE',
                 'display_name' => 'Account Executive',
-                'description' => NULL,
+                'description' => null,
                 'created_at' => '2025-04-07 16:01:03',
                 'updated_at' => '2025-04-07 16:01:03',
-            ),
-            1 => 
-            array (
+            ],
+            [
                 'id' => 2,
                 'name' => 'FIN',
                 'display_name' => 'Finance and Accounting',
-                'description' => NULL,
+                'description' => null,
                 'created_at' => '2025-04-07 16:45:35',
                 'updated_at' => '2025-04-07 16:45:55',
-            ),
-            2 => 
-            array (
+            ],
+            [
                 'id' => 3,
                 'name' => 'SA',
                 'display_name' => 'Super Admin',
-                'description' => NULL,
+                'description' => null,
                 'created_at' => '2025-04-07 18:34:33',
                 'updated_at' => '2025-04-07 18:34:33',
-            ),
-        ));
-        
-        
+            ],
+        ];
+
+        DB::table('roles')->insert($roles);
     }
 }

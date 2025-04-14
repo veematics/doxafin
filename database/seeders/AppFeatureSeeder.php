@@ -7,53 +7,74 @@ use Illuminate\Support\Facades\DB;
 
 class AppFeatureSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $features = [
             [
-                'featureName' => 'User Management',
-                'featureDescription' => 'Manage system users and their roles',
-                'featureIcon' => 'cil-people',
-                'featureActive' => true,
-                'featurePath' => 'appsetting/user',
-                'created_at' => now(),
-                'updated_at' => now()
+                'featureID' => 7,
+                'featureName' => 'Client',
+                'featureDescription' => null,
+                'featureIcon' => 'cil-smile',
+                'featurePath' => '/client',
+                'featureActive' => 1,
+                'created_at' => '2025-04-07 13:56:34',
+                'updated_at' => '2025-04-11 10:30:05',
+                'custom_permission' => '"Listing Access:Own, Global, Group"'
             ],
             [
-                'featureName' => 'Menu Builder',
-                'featureDescription' => 'Manage application menus and navigation',
-                'featureIcon' => 'cil-menu',
-                'featureActive' => true,
-                'featurePath' => 'appsetting/menu',
-                'created_at' => now(),
-                'updated_at' => now()
+                'featureID' => 10,
+                'featureName' => 'Invoice',
+                'featureDescription' => null,
+                'featureIcon' => 'cil-share-boxed',
+                'featurePath' => '/invoice',
+                'featureActive' => 1,
+                'created_at' => '2025-04-07 14:37:42',
+                'updated_at' => '2025-04-07 14:37:42',
+                'custom_permission' => null
             ],
             [
-                'featureName' => 'App Setup',
-                'featureDescription' => 'Configure application settings',
-                'featureIcon' => 'cil-settings',
-                'featureActive' => true,
-                'featurePath' => 'appsetting/appsetup',
-                'created_at' => now(),
-                'updated_at' => now()
+                'featureID' => 11,
+                'featureName' => 'Payment',
+                'featureDescription' => null,
+                'featureIcon' => 'cil-dollar',
+                'featurePath' => '/payment',
+                'featureActive' => 1,
+                'created_at' => '2025-04-07 14:38:16',
+                'updated_at' => '2025-04-07 14:38:16',
+                'custom_permission' => null
             ],
             [
-                'featureName' => 'Feature Management',
-                'featureDescription' => 'Manage application features',
-                'featureIcon' => 'cil-featured-playlist',
-                'featureActive' => true,
-                'featurePath' => 'appsetting/appfeature',
-                'created_at' => now(),
-                'updated_at' => now()
+                'featureID' => 12,
+                'featureName' => 'Purchase Order',
+                'featureDescription' => null,
+                'featureIcon' => 'cil-indent-increase',
+                'featurePath' => '/po',
+                'featureActive' => 1,
+                'created_at' => '2025-04-07 14:39:04',
+                'updated_at' => '2025-04-11 10:30:19',
+                'custom_permission' => null
             ],
             [
-                'featureName' => 'Territory Management',
-                'featureDescription' => 'Manage territories and regions',
-                'featureIcon' => 'cil-vector',
-                'featureActive' => true,
-                'featurePath' => 'appsetting/territory',
-                'created_at' => now(),
-                'updated_at' => now()
+                'featureID' => 14,
+                'featureName' => 'Project',
+                'featureDescription' => null,
+                'featureIcon' => 'cil-book',
+                'featurePath' => '/project',
+                'featureActive' => 1,
+                'created_at' => '2025-04-07 16:14:34',
+                'updated_at' => '2025-04-07 16:14:34',
+                'custom_permission' => null
+            ],
+            [
+                'featureID' => 15,
+                'featureName' => 'Inbox',
+                'featureDescription' => null,
+                'featureIcon' => 'cil-envelope-closed',
+                'featurePath' => '/inbox',
+                'featureActive' => 1,
+                'created_at' => '2025-04-10 22:01:27',
+                'updated_at' => '2025-04-10 22:01:27',
+                'custom_permission' => null
             ]
         ];
 
