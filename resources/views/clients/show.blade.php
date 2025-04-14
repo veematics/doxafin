@@ -1,12 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">{{ __('Client Details') }}</h6>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">{{ __('Client Details') }}</h2>
             <a href="{{ route('clients.index') }}" class="btn btn-primary btn-sm">
                 <i class="cil-arrow-left"></i> {{ __('Back to List') }}
             </a>
         </div>
-    </x-slot>
+
 
     <div class="card mb-4">
         <div class="card-header">
@@ -67,11 +67,21 @@
                 </div>
             </div>
 
-            @if($client->notes)
+            @if($client->notes || $client->payment_terms)
                 <div class="mt-4">
-                    <h6>{{ __('Notes') }}</h6>
-                    <div class="p-3 rounded" style="background: var(--bs-secondary-bg); color: var(--bs-body-color);">
-                        {{ $client->notes }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>{{ __('Notes') }}</h6>
+                            <div class="p-3 rounded" style="background: var(--bs-secondary-bg); color: var(--bs-body-color);">
+                                {!! $client->notes !!}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>{{ __('Default Payment Terms') }}</h6>
+                            <div class="p-3 rounded" style="background: var(--bs-secondary-bg); color: var(--bs-body-color);">
+                                {!! $client->payment_terms !!}
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif

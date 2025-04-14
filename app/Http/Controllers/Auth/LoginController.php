@@ -19,6 +19,11 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    public function redirectTo()
+    {
+        return '/dashboard';
+    }
+
     protected function authenticated()
     {
         // Rebuild user permissions cache
@@ -45,5 +50,6 @@ class LoginController extends Controller
     protected function loggedOut()
     {
         Cache::forget('sidebar_menu_items');
+        return redirect('/');
     }
 }

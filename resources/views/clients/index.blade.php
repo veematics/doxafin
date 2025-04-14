@@ -17,9 +17,9 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="col-md-6">
-                            <form action="{{ route('clients.index') }}" method="GET" id="searchForm">
+                            <form action="{{ route('clients.contacts.search') }}" method="GET" id="searchForm">
                                 <div class="input-group">
-                                    <input type="text" class="form-control" name="search" 
+                                    <input type="text" class="form-control" name="s" 
                                         placeholder="Search by company or contact name..." 
                                         value="{{ request('search') }}">
                                     <select class="form-select" style="max-width: 120px;" name="per_page" onchange="document.getElementById('searchForm').submit()">
@@ -78,6 +78,14 @@
                                             <a href="{{ route('clients.edit', $client) }}" class="btn btn-sm btn-primary">
                                                 <i class="cil-pencil"></i>
                                             </a>
+                                            <form action="{{ route('clients.destroy', $client) }}" method="POST" class="d-inline" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this client?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="cil-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @empty

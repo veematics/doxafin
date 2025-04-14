@@ -17,13 +17,15 @@ class Contact extends Model
         'created_by'
     ];
 
-    public function client()
-    {
-        return $this->belongsTo(Client::class);
-    }
+
 
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 }

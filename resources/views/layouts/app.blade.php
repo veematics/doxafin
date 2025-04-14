@@ -120,10 +120,22 @@
          
           </ul>
           <ul class="header-nav ms-auto ms-md-0">
+          <li class="nav-item py-1">
+            <form class="d-flex" action="{{ route('clients.contacts.search') }}" method="GET">
+                <div class="input-group">
+                    <input class="form-control form-control-sm" type="search" name="s" placeholder="Search Contact or Company..." aria-label="Search">
+                    <button class="btn btn-sm btn-outline-primary" type="submit">
+                        <svg class="icon">
+                            <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-search"></use>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+          </li>
             <li class="nav-item py-1">
               <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
             </li>
-           
+            
             <li class="nav-item dropdown">
               <button class="btn btn-link nav-link" type="button" aria-expanded="false" data-coreui-toggle="dropdown">
                 <svg class="icon icon-lg theme-icon-active">

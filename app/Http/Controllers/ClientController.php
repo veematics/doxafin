@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
 use Illuminate\Http\Request;
+use App\Models\Client;
 use App\Helpers\FeatureAccess; // Add this import
 use Illuminate\Support\Facades\Cache;
 use App\Models\AppFeature;
 use App\Models\User;
+use App\Models\Contact;  // Add this with other use statements at the top
 
 class ClientController extends Controller
 {
@@ -198,4 +199,62 @@ class ClientController extends Controller
     
         return $query->orderBy('company_name')->get();
     }
+
+    public function searchContacts(Request $request)
+    {
+        $featureId = AppFeature::where('featureName', 'Clients')->value('featureID');
+        $userId = auth()->id();
+        // Update to accept both 'q' and 's' parameters
+        $searchTerm = $request->input('q', $request->input('s', ''));
+        
+        if ($request->ajax()) {
+            // For AJAX search in header
+            $searchQuery = Client::where('company_name', 'LIKE', "%{$searchTerm}%")
+                ->orWhereHas('contacts', function($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('email', 'LIKE', "%{$searchTerm}%");
+                })
+                ->with('contacts');
+        } else {
+            // For full contact search page
+            $searchQuery = Contact::query()
+                ->join('clients', 'contacts.client_id', '=', 'clients.id')
+                ->select('contacts.*', 'clients.company_name', 'clients.id as client_id')
+                ->where(function($q) use ($searchTerm) {
+                    $q->where('contacts.name', 'like', "%{$searchTerm}%")
+                      ->orWhere('clients.company_name', 'like', "%{$searchTerm}%")
+                      ->orWhere('contacts.email', 'like', "%{$searchTerm}%");
+                });
+        }
+
+        // Apply permission filters based on user's access level
+        $canView = FeatureAccess::check($userId, 'Clients', 'can_view');
+        
+        if ($canView == 3) {
+            $searchQuery->where('clients.assign_to', $userId);
+        } elseif ($canView == 2) {
+            $userRoleIds = auth()->user()->roles()->pluck('roles.id');
+            $searchQuery->whereIn('clients.assign_to', function($subquery) use ($userRoleIds) {
+                $subquery->select('users.id')
+                    ->from('users')
+                    ->join('role_user', 'users.id', '=', 'role_user.user_id')
+                    ->whereIn('role_user.role_id', $userRoleIds);
+            });
+        }
+
+        if ($request->ajax()) {
+            $results = $searchQuery->get();
+            return view('clients.search-results', compact('results', 'searchTerm'));
+        } else {
+            $contacts = $searchQuery->paginate(10);
+            return view('clients.contacts.search', compact('contacts', 'searchTerm'));
+        }
+    }
+    public function destroy(Client $client)
+    {
+        $client->delete();
+        return redirect()->route('clients.index')
+            ->with('success', 'Client deleted successfully');
+    }
 }
+

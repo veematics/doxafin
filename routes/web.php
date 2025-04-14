@@ -11,6 +11,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\InboxMessageController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CsvDataController;
 
 Route::get('/', [WelcomeController::class, 'index'])
     ->middleware('guest')
@@ -58,7 +59,7 @@ Route::get('/dashboard', function () {
         
         // App Setup Routes
         Route::get('/appsetup', [AppSetupController::class, 'index'])->name('appsetup.index');
-        Route::put('/appsetup', [AppSetupController::class, 'update'])->name('appsetup.update'); // Removed {id} parameter
+        Route::put('/appsetup', [AppSetupController::class, 'update'])->name('appsetup.update');
     
 
         // Menu Management Routes
@@ -75,7 +76,7 @@ Route::get('/dashboard', function () {
         Route::post('roles/{role}/remove-member/{user}', [RoleController::class, 'removeMember'])
             ->name('roles.remove-member');
         Route::post('/appsetting/roles/{role}/duplicate', [RoleController::class, 'duplicate'])->name('roles.duplicate');
-    });
+    }); // <-- Added closing brace for appsetting group
 
 
 });
@@ -111,34 +112,56 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('index');
         Route::get('/create', [ClientController::class, 'create'])->name('create');
         Route::post('/', [ClientController::class, 'store'])->name('store');
+        Route::get('/{client}', [ClientController::class, 'show'])->name('show');
+        Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit');
+        Route::put('/{client}', [ClientController::class, 'update'])->name('update');
+        Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');  // Add this line
+
+        // Contact search route
+        Route::get('/clients/contacts/search', [ClientController::class, 'searchContacts'])
+            ->name('clients.contacts.search');
 
         // Independent contact creation route
         Route::get('/contacts/create', [ContactController::class, 'createIndependent'])->name('contacts.create-independent');
         Route::post('/contacts', [ContactController::class, 'storeIndependent'])->name('contacts.store-independent');
-        
+        Route::get('/contacts/search', [ClientController::class, 'searchContacts'])->name('contacts.search');  
         // Nested client and contact routes
         Route::prefix('{client}')->group(function () {
+            
             Route::get('/contacts/create', [ContactController::class, 'create'])->name('contacts.create');
             Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
+             
             Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
             Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update');
             Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
             Route::patch('/contacts/{contact}/make-primary', [ContactController::class, 'makePrimary'])
                 ->name('contacts.make-primary');
-                
+            // Contact search route
+   
             // Client-specific routes
             Route::get('/edit', [ClientController::class, 'edit'])->name('edit');
             Route::put('/', [ClientController::class, 'update'])->name('update');
             Route::get('/', [ClientController::class, 'show'])->name('show');
-        });
-    });
-  
-});
 
-// Remove this duplicate route group
-// Route::prefix('appsetting')->name('appsetting.')->group(function () {
-//     Route::resource('users', \App\Http\Controllers\Appsetting\UserController::class);
-// });
+        });
+
+    });
+    // Update the CSV data routes
+    // CSV Data Routes - simplified version
+    Route::middleware('auth')->group(function () {
+        Route::resource('csv-data', CsvDataController::class, [
+            'parameters' => ['csv-data' => 'csvData'] // Define the parameter name explicitly
+        ])->except(['show'])->names([
+            'index' => 'csv-data.index',
+            'create' => 'csv-data.create',
+            'store' => 'csv-data.store',
+            'edit' => 'csv-data.edit',
+            'update' => 'csv-data.update',
+            'destroy' => 'csv-data.destroy',
+        ]);
+        Route::get('csv-data/{csvData}/view', [CsvDataController::class, 'view'])->name('csv-data.view');
+    });
+});
 require __DIR__.'/auth.php';
 
 

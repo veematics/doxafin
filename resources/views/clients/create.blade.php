@@ -116,7 +116,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-12 mb-3">
+                    <div class="col-12 mb-5">
                         <x-ckeditor 
                             id="payment_terms"
                             name="payment_terms"
@@ -126,18 +126,17 @@
                         />
                     </div>
 
-                    <div class="col-12 mb-3">
-                        <label class="form-label" for="notes">{{ __('Notes') }}</label>
-                        <textarea class="form-control @error('notes') is-invalid @enderror" 
-                            id="notes" name="notes" rows="3" 
-                            style="background: var(--cui-body-bg); color: var(--cui-body-color);">{{ old('notes') }}</textarea>
-                        @error('notes')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div class="col-12 mb-5 ">
+                        <x-ckeditor 
+                            id="notes"
+                            name="notes"
+                            height="200px"
+                            label="{{ __('Notes') }}"
+                            :value="old('notes')"
+                        />
                     </div>
-                </div>
 
-                <div class="d-flex justify-content-end gap-2">
+                    <div class="d-flex justify-content-end gap-2">
                     <a href="{{ route('clients.index') }}" class="btn btn-light">{{ __('Cancel') }}</a>
                     <button type="submit" class="btn btn-primary">{{ __('Create Client') }}</button>
                 </div>
