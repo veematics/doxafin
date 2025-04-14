@@ -18,10 +18,12 @@ class Client extends Model
         'company_address',
         'npwp',
         'website',
-        'social_profiles',
-        'notes',
         'assign_to',
-        'assigned_at'
+        'payment_terms', // Added this line
+        'notes',
+        'created_by',
+        'assigned_at',
+        'created_by'
     ];
 
     protected $casts = [

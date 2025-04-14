@@ -17,7 +17,8 @@ export default defineConfig(({ command, mode }) => {
                     'resources/js/nonapp.js',
                     'resources/js/inboxselect2.js',
                     'resources/js/clientselect2.js',
-                    'resources/css/select2.css'
+                    'resources/css/select2.css',
+                    'resources/js/ckeditor.js'
                 ],
                 refresh: true,
             }),

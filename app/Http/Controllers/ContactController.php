@@ -94,27 +94,28 @@ class ContactController extends Controller
         $featureId = $this->getFeatureID();
         $canView = \App\Helpers\FeatureAccess::getViewLevelById(auth()->id(), $featureId);
         
-        // Get filtered clients based on permission level
         $query = Client::query();
         
         switch ($canView) {
             case 1: // View all
                 break;
             case 2: // Same role
-                $userRoleIds = auth()->user()->roles()->pluck('id');
+                $userRoleIds = auth()->user()->roles()->pluck('roles.id'); // Specify the table name
                 $userIds = \DB::table('role_user')
-                    ->whereIn('role_id', $userRoleIds)
+                    ->join('roles', 'roles.id', '=', 'role_user.role_id')
+                    ->select('role_user.user_id') // Explicitly select the user_id column
+                    ->whereIn('roles.id', $userRoleIds)
                     ->pluck('user_id');
-                $query->whereIn('assign_to', $userIds);
+                $query->whereIn('clients.assign_to', $userIds);
                 break;
             case 3: // Only assigned
-                $query->where('assign_to', auth()->id());
+                $query->where('clients.assign_to', auth()->id());
                 break;
             default:
-                $query->where('id', 0); // Return empty if no valid permission
+                $query->where('clients.id', 0);
         }
         
-        $clients = $query->orderBy('company_name')->get();
+        $clients = $query->orderBy('clients.company_name')->get();
         
         return view('clients.contacts.create-independent', compact('clients', 'featureId', 'canView'));
     }

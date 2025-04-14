@@ -70,7 +70,7 @@
             @if($client->notes)
                 <div class="mt-4">
                     <h6>{{ __('Notes') }}</h6>
-                    <div class="p-3 bg-light rounded">
+                    <div class="p-3 rounded" style="background: var(--bs-secondary-bg); color: var(--bs-body-color);">
                         {{ $client->notes }}
                     </div>
                 </div>

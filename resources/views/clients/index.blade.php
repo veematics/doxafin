@@ -39,10 +39,16 @@
                                 </div>
                             </form>
                         </div>
-                        <div>
-                            <a href="{{ route('clients.create') }}" class="btn btn-primary">
-                                <i class="cil-plus"></i> {{ __('Add New Client') }}
-                            </a>
+                        <div class="d-flex justify-content-between mb-3">
+                        
+                            @php
+                                $permission = App\Helpers\FeatureAccess::check(auth()->id(), 'Clients', 'can_create')
+                            @endphp
+                            @if($permission == 1)
+                                <a href="{{ route('clients.create') }}" class="btn btn-primary">
+                                    Add New Client
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>

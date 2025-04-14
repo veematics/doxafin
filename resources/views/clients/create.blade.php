@@ -82,6 +82,28 @@
                         <select class="form-select @error('assign_to') is-invalid @enderror" 
                             id="assign_to" name="assign_to">
                             <option value="">{{ __('Select User') }}</option>
+                            @php
+                                $featureId = App\Models\AppFeature::where('featureName', 'Clients')->value('featureID');
+                                $permissions = Cache::get('user_permissions_' . auth()->id());
+                                $canView = $permissions[$featureId]->first()->can_view;
+                                
+                                $userQuery = App\Models\User::query();
+                                
+                                if ($canView == 3) {
+                                    $userQuery->where('users.id', auth()->id());
+                                } elseif ($canView == 2) {
+                                    $userRoleIds = auth()->user()
+                                        ->roles()
+                                        ->select('roles.id as role_id')
+                                        ->pluck('role_id');
+                                    $userQuery->whereHas('roles', function($query) use ($userRoleIds) {
+                                        $query->whereIn('roles.id', $userRoleIds);
+                                    });
+                                }
+                                
+                                $users = $userQuery->get();
+                            @endphp
+                            
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}" 
                                     {{ (old('assign_to', auth()->id()) == $user->id) ? 'selected' : '' }}>
@@ -95,9 +117,20 @@
                     </div>
 
                     <div class="col-12 mb-3">
+                        <x-ckeditor 
+                            id="payment_terms"
+                            name="payment_terms"
+                            height="300px"
+                            label="{{ __('Payment Terms') }}"
+                            :value="old('payment_terms')"
+                        />
+                    </div>
+
+                    <div class="col-12 mb-3">
                         <label class="form-label" for="notes">{{ __('Notes') }}</label>
                         <textarea class="form-control @error('notes') is-invalid @enderror" 
-                            id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>
+                            id="notes" name="notes" rows="3" 
+                            style="background: var(--cui-body-bg); color: var(--cui-body-color);">{{ old('notes') }}</textarea>
                         @error('notes')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

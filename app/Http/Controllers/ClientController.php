@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Helpers\FeatureAccess; // Add this import
 use Illuminate\Support\Facades\Cache;
 use App\Models\AppFeature;
+use App\Models\User;
 
 class ClientController extends Controller
 {
@@ -42,15 +43,20 @@ class ClientController extends Controller
             case 1: // All clients
                 break;
             case 2: // Clients from same roles
-                $userRoleIds = auth()->user()->roles()->pluck('roles.id');
+                $userRoleIds = auth()->user()
+                    ->roles()
+                    ->select('roles.id')  // Explicitly select roles.id
+                    ->pluck('roles.id');  // Use explicit table.column reference
+                    
                 $query->whereExists(function ($subquery) use ($userRoleIds) {
                     $subquery->from('role_user')
+                        ->select('role_user.user_id')  // Add explicit column selection
                         ->whereColumn('role_user.user_id', 'clients.assign_to')
                         ->whereIn('role_user.role_id', $userRoleIds);
                 });
                 break;
             case 3: // Only assigned clients
-                $query->where('assign_to', auth()->id());
+                $query->where('clients.assign_to', auth()->id());
                 break;
             default:
                 abort(403, 'Unauthorized access');
@@ -76,36 +82,42 @@ class ClientController extends Controller
         $canView = FeatureAccess::getViewLevelById(auth()->id(), $featureId);
         
         $users = match ($canView) {
-            1 => User::all(), // All users
+            1 => User::all(),
             2 => User::whereHas('roles', function($query) {
-                    $query->whereIn('id', auth()->user()->roles->pluck('id'));
-                })->get(), // Users in same roles
-            3 => User::where('id', auth()->id())->get(), // Only current user
-            default => collect([auth()->user()]), // Fallback to current user
+                    $userRoleIds = auth()->user()
+                        ->roles()
+                        ->select('roles.id as role_id')
+                        ->pluck('role_id');
+                    $query->whereIn('roles.id', $userRoleIds);
+                })->get(),
+            3 => User::where('id', auth()->id())->get(),
+            default => collect([auth()->user()]),
         };
-
-        return view('clients.create', compact('users'));
+    
+        return view('clients.create', [
+            'users' => $users,
+            'created_by' => auth()->id()
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'company_name' => 'required|string|max:255',
-            'company_alias' => 'nullable|string|max:50',
-            'company_code' => 'required|string|size:4|unique:clients,company_code|alpha',
+            'company_alias' => 'nullable|string|max:255',
+            'company_code' => 'nullable|string|max:4',
             'company_address' => 'nullable|string',
             'npwp' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
-            'assign_to' => 'required|exists:users,id',
-            'notes' => 'nullable|string'
+            'assign_to' => 'nullable|exists:users,id',
+            'payment_terms' => 'nullable|string', // Added this line
+            'notes' => 'nullable|string',
         ]);
 
-        $validated['company_code'] = strtoupper($validated['company_code']);
-
-        $client = Client::create([
-            ...$validated,
-            'created_by' => auth()->id()
-        ]);
+        // Set created_by field to current user id
+        $validated['created_by'] = auth()->id();
+        
+        $client = Client::create($validated);
 
         return redirect()
             ->route('clients.show', $client)
