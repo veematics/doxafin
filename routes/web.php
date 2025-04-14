@@ -12,6 +12,7 @@ use App\Http\Controllers\InboxMessageController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CsvDataController;
+use App\Http\Controllers\PurchaseOrderController;
 
 Route::get('/', [WelcomeController::class, 'index'])
     ->middleware('guest')
@@ -160,6 +161,18 @@ Route::middleware(['auth'])->group(function () {
             'destroy' => 'csv-data.destroy',
         ]);
         Route::get('csv-data/{csvData}/view', [CsvDataController::class, 'view'])->name('csv-data.view');
+        
+    });
+
+    // Purchase Order Routes
+    Route::middleware(['auth'])->prefix('po')->name('purchase-orders.')->group(function () {
+        Route::get('/', [PurchaseOrderController::class, 'index'])->name('index');
+        Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create');
+        Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
+        Route::get('/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->name('show');
+        Route::get('/{purchaseOrder}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
+        Route::put('/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('update');
+        Route::delete('/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
     });
 });
 require __DIR__.'/auth.php';
