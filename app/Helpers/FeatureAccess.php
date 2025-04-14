@@ -24,6 +24,8 @@ class FeatureAccess
             ->join('role_user', 'roles.id', '=', 'role_user.role_id')
             ->where('role_user.user_id', $userId)
             ->where('roles.name', 'SA')
+            // Specify the table name for the id column
+            ->select('roles.id')
             ->exists();
 
         if ($isSA) {
@@ -147,5 +149,27 @@ class FeatureAccess
     {
         self::clearCache($userId);
         return self::cacheUserPermissions($userId);
+    }
+
+    public static function check($userId, $featureName, $permission)
+    {
+        // Get feature ID by name
+        $featureId = Cache::remember('feature_id_' . $featureName, 3600, function () use ($featureName) {
+            return AppFeature::where('featureName', $featureName)->value('featureID');
+        });
+    
+        if (!$featureId) {
+            return false;
+        }
+    
+        // Use the established cache key pattern
+        $permissions = self::getUserPermissions($userId);
+    
+        if (!isset($permissions[$featureId])) {
+            return false;
+        }
+    
+        // Check the specific permission (can_create, can_edit, etc.)
+        return $permissions[$featureId]->first()->$permission;
     }
 }
