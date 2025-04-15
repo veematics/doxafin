@@ -16,16 +16,15 @@ export default defineConfig(({ command, mode }) => {
                     'resources/js/app.js',
                     'resources/js/nonapp.js',
                     'resources/js/inboxselect2.js',
-                    'resources/js/clientselect2.js',
                     'resources/css/select2.css',
-                    'resources/js/ckeditor.js'
+                    'resources/js/ckeditor-init.js',
+                    'resources/js/select2.js',
+                    'resources/js/jquery.js',
                 ],
                 refresh: true,
             }),
         ],
-        optimizeDeps: {
-            include: ['jquery', 'select2']
-        },
+
         server: {
             host: host,
             hmr: {

@@ -13,6 +13,7 @@
 
         <!-- Scripts -->
         @vite(['resources/sass/app.scss', 'resources/css/custom.css', 'resources/js/app.js'])
+        @stack('headerscripts')
         <script>
             // Theme initialization
             document.addEventListener('DOMContentLoaded', function() {
