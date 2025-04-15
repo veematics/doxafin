@@ -1,5 +1,4 @@
 <x-app-layout>
-
     <a href="{{ route('playground.index') }}" class="btn btn-primary mb-4"><< Back to Index</a>
     
     <div class="container-lg">
@@ -25,21 +24,18 @@
                         placeholder="Choose an option"
                     />
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Test Select2</label>
+                    <label class="form-label">Multiple Select</label>
                     <x-select2 
-                        id="test2-select"
-                        name="test2_select"
+                        id="multiple-select"
+                        name="multiple_select[]"
                         :options="[
                             'data' => 'Data',
                             'alamat' => 'Alamat',
-                            'nomor_telepon' => 'Nomor Telepon',
-                            'status' => 'Status',
-                            'dana' => 'Dana',
-                            'doxadigital' => 'Doxadigital',
-                            'pt_doxa360' => 'PT Doxa360'
+                            'nomor_telepon' => 'Nomor Telepon'
                         ]"
-                        placeholder="Choose an option"
+                        multiple
                     />
                 </div>
             </div>
