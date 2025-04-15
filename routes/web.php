@@ -39,7 +39,7 @@ Route::get('/dashboard', function () {
         \App\Helpers\FeatureAccess::rebuildCache(auth()->id());
         return back()->with('success', 'Cache rebuilt successfully');
     })->name('debug.rebuild-cache');
-    
+     
 
 
     // Coming Soon Route
@@ -77,15 +77,30 @@ Route::get('/dashboard', function () {
         Route::post('roles/{role}/remove-member/{user}', [RoleController::class, 'removeMember'])
             ->name('roles.remove-member');
         Route::post('/appsetting/roles/{role}/duplicate', [RoleController::class, 'duplicate'])->name('roles.duplicate');
-    }); // <-- Added closing brace for appsetting group
+    }); // End of appsetting group
 
+    // Add playground routes
+    // Playground routes
+    Route::prefix('playground')->name('playground.')->group(function () {
+        Route::get('/', function () {
+            return view('playground.index');
+        })->name('index');
+        
+        Route::get('/roles', function () {
+            return view('playground.roles');
+        })->name('roles');
 
-});
+        Route::get('/select2', function () {
+            return view('playground.select2');
+        })->name('select2');
 
-Route::middleware(['auth'])->group(function () {
+        Route::get('/ckeditor', function () {
+            return view('playground.demockeditor');
+        })->name('ckeditor');
+    });
+
     // Inbox routes
     Route::prefix('inbox')->name('inbox.')->group(function () {
-        // Place specific routes BEFORE wildcard routes
         Route::get('/', [InboxMessageController::class, 'index'])->name('index');
         Route::get('/sent', [InboxMessageController::class, 'sent'])->name('sent');
         Route::get('/trash', [InboxMessageController::class, 'trash'])->name('trash');
