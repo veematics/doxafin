@@ -34,5 +34,12 @@ class PurchaseOrderController extends Controller
         return redirect()->route('purchase-orders.index')->with('success', 'Purchase Order created successfully.');
     }
 
-    // Add other resource methods as needed
+    public function show(PurchaseOrder $purchaseOrder)
+    {
+        return view('purchase-orders.show', [
+            'purchaseOrder' => $purchaseOrder,
+            'clients' => Client::all(),
+            'statuses' => PurchaseOrder::STATUSES
+        ]);
+    }
 }

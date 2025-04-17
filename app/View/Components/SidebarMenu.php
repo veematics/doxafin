@@ -19,7 +19,8 @@ class SidebarMenu extends Component
         $noCache = Request::get('no_cache') == 1;
 
         if ($noCache) {
-            $this->menuItems = $this->getSidebarMenuItems();
+            $this->menuItems = $this->getSidebarMenuItems($userId);  // Added missing $userId parameter
+          
             Cache::put($cacheKey, $this->menuItems, now()->addDay());
         } else {
             $this->menuItems = Cache::remember($cacheKey, now()->addDay(), function () use ($userId) {
@@ -30,10 +31,9 @@ class SidebarMenu extends Component
 
     private function getSidebarMenuItems($userId)
     {
-        // Get user permissions from cache
         $userPermissions = Cache::get('user_permissions_' . $userId, []);
 
-        // Get parent menu items for Sidebar Menu
+        // Get parent menu items
         $menuItems = DB::table('menus')
             ->join('menu_items', 'menus.id', '=', 'menu_items.menu_id')
             ->where('menus.name', '=', 'Sidebar Menu')
@@ -42,32 +42,30 @@ class SidebarMenu extends Component
             ->orderBy('menu_items.order')
             ->get();
 
-        return $menuItems->map(function ($item) use ($userPermissions) {
-            // Check user permission for this menu item
-            $canView = $this->checkPermission($item->app_feature_id, $userPermissions);
+        // First filter out unauthorized parent items
+        return $menuItems
+            ->filter(function ($item) use ($userPermissions) {
+                return $this->checkPermission($item->app_feature_id, $userPermissions);
+            })
+            ->map(function ($item) use ($userPermissions) {
+                // Get and filter child items
+                $children = DB::table('menu_items')
+                    ->where('parent_id', $item->id)
+                    ->orderBy('order')
+                    ->get()
+                    ->filter(function ($child) use ($userPermissions) {
+                        return $this->checkPermission($child->app_feature_id, $userPermissions);
+                    });
 
-            // Skip this menu item if user doesn't have permission
-            if (!$canView) {
-                return null;
-            }
-
-            // Get child menu items for each parent
-            $children = DB::table('menu_items')
-                ->where('parent_id', $item->id)
-                ->orderBy('order')
-                ->get()
-                ->filter(function ($child) use ($userPermissions) {
-                    return $this->checkPermission($child->app_feature_id, $userPermissions);
-                });
-
-            return [
-                'id' => $item->id,
-                'title' => $item->title,
-                'path' => $item->path,
-                'icon' => $item->icon,
-                'children' => $children
-            ];
-        })->filter(); // Remove null items (skipped due to permissions)
+                // Return formatted menu item
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'path' => $item->path,
+                    'icon' => $item->icon,
+                    'children' => $children
+                ];
+            });
     }
 
     private function checkPermission($featureId, $userPermissions)
@@ -75,9 +73,9 @@ class SidebarMenu extends Component
         if ($featureId === null) {
             return true; // Set 'can_view' directly to 1 if feature_id is null
         }
-
-        // Check 'can_view' parameter from user_permissions cache
-        return isset($userPermissions[$featureId]['can_view']) && $userPermissions[$featureId]['can_view'] >= 1;
+       
+        return (isset($userPermissions[$featureId][0]->can_view) && ($userPermissions[$featureId][0]->can_view >= 1));
+             
     }
 
     public function render()
