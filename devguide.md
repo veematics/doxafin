@@ -73,3 +73,47 @@ The component:
 - Properly handles validation errors
 - Uses the @once directive to prevent duplicate script loading
 When displaying content from CKEditor, use the {!! $content !!} syntax to render the HTML properly.
+
+# Using CKEditor in a View Component
+When working with CKEditor in a Laravel Blade view component, you can use the following code to set the content of the editor:
+
+```javascript
+// Set the CKEditor content
+const editor = ckeditors.get(document.getElementById('editorId'));
+editor.setData(content);
+ ```
+```
+
+Notes on usage:
+
+1. Replace 'editorId' with the actual ID of your CKEditor instance. This should match the id attribute of the textarea in your Blade component.
+2. The ckeditors object is a map that stores all CKEditor instances on the page. It's created by the CKEditor initialization script.
+3. document.getElementById('editorId') retrieves the textarea element that CKEditor is attached to.
+4. ckeditors.get(...) retrieves the CKEditor instance associated with that textarea.
+5. editor.setData(content) sets the content of the editor. Replace content with the string you want to set as the editor's content.
+6. Make sure this code runs after the CKEditor has been fully initialized. You might want to wrap it in a DOMContentLoaded event listener or call it after the editor initialization promise resolves.
+Example usage in your Blade component:
+
+```php
+<x-ckeditor 
+    id="myEditor"
+    name="myEditor"
+    height="300px"
+    label="{{ __('Editor Label') }}"
+/>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const myContent = "This is the content to set";
+    const editor = ckeditors.get(document.getElementById('myEditor'));
+    if (editor) {
+        editor.setData(myContent);
+    } else {
+        console.error('Editor not found');
+    }
+});
+</script>
+@endpush
+ ```
+```

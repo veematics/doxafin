@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 class FeatureAccess
 {
     private static $cachePrefix = 'user_permissions_';
-    private static $cacheDuration = 3600; // 1 hour
+    private static $cacheDuration = 28800; // 8 hour
 
     private static function getCacheKey($userId)
     {
@@ -151,10 +151,18 @@ class FeatureAccess
         return self::cacheUserPermissions($userId);
     }
 
+    public static function getFeatureID($featureName)
+    {
+        return Cache::remember('feature_id_' . $featureName, 3600, function () use ($featureName) {
+            $feature = AppFeature::where('featureName', $featureName)->first();
+            return $feature ? $feature->featureID : null;
+        });
+    }
+
     public static function check($userId, $featureName, $permission)
     {
         // Get feature ID by name
-        $featureId = Cache::remember('feature_id_' . $featureName, 3600, function () use ($featureName) {
+        $featureId = Cache::remember('feature_id_' . $featureName, 86400, function () use ($featureName) {
             $feature = AppFeature::where('featureName', $featureName)->first();
             
             // If feature doesn't exist, try to create it 
@@ -201,4 +209,5 @@ class FeatureAccess
         // For other permissions, return boolean
         return (bool) $permissions[$featureId]->first()->$permission;
     }
+    
 }

@@ -23,6 +23,11 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
     Route::middleware('auth')->group(function () {
+    // Media Viewing Routes
+    Route::prefix('media')->name('media.')->group(function () {
+        Route::get('view/{filename}', [\App\Http\Controllers\MediaController::class, 'show'])->name('view');
+    });
+
     // --- Profile Routes ---
     // These seem fine as they are. Grouping them can be slightly cleaner.
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -81,7 +86,7 @@ Route::get('/dashboard', function () {
 
     // Add playground routes
     // Playground routes
-    Route::prefix('playground')->name('playground.')->group(function () {
+    Route::prefix('playground')->name('playground.')->middleware(['auth'])->group(function () {
         Route::get('/', function () {
             return view('playground.index');
         })->name('index');
@@ -89,14 +94,17 @@ Route::get('/dashboard', function () {
         Route::get('/roles', function () {
             return view('playground.roles');
         })->name('roles');
-
+    
         Route::get('/select2', function () {
             return view('playground.select2');
         })->name('select2');
-
+    
         Route::get('/ckeditor', function () {
             return view('playground.demockeditor');
         })->name('ckeditor');
+        Route::get('/memberroles', function () {
+            return view('playground.demockeditor');
+        })->name('memberroles');
     });
 
     // Inbox routes
@@ -136,6 +144,7 @@ Route::get('/dashboard', function () {
         // Contact search route
         Route::get('/clients/contacts/search', [ClientController::class, 'searchContacts'])
             ->name('clients.contacts.search');
+        Route::get('/clients/{client}', [ClientController::class, 'getClientDetails'])->name('clients.details');
 
         // Independent contact creation route
         Route::get('/contacts/create', [ContactController::class, 'createIndependent'])->name('contacts.create-independent');
@@ -182,15 +191,36 @@ Route::get('/dashboard', function () {
     // Purchase Order Routes
     Route::middleware(['auth'])->prefix('po')->name('purchase-orders.')->group(function () {
         Route::get('/', [PurchaseOrderController::class, 'index'])->name('index');
+        Route::resource('purchase-orders', PurchaseOrderController::class)
+            ->except(['create', 'edit'])
+            ->names([
+                'index' => 'purchase-orders.index',
+                'store' => 'purchase-orders.store',
+                'show' => 'purchase-orders.show',
+                'update' => 'purchase-orders.update',
+                'destroy' => 'purchase-orders.destroy',
+            ]);
+        
+        Route::get('/add', [PurchaseOrderController::class, 'create'])
+            ->name('add');
+        Route::get('/{purchaseOrder}/edit', [PurchaseOrderController::class, 'edit'])
+            ->name('edit');
         Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create');
         Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
         Route::get('/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->name('show');
         Route::get('/{purchaseOrder}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
         Route::put('/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('update');
         Route::delete('/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
-    });
+        Route::get('/{purchaseOrder}/services', [PurchaseOrderController::class, 'services'])
+            ->name('services');
+        });
+    // Route::middleware('auth')->prefix('api')->group(function () {
+    //     Route::get('/clients/{client}', [ClientController::class, 'getClientDetails']);
+    // });
 });
 require __DIR__.'/auth.php';
+
+
 
 
 

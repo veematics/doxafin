@@ -29,6 +29,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Get the authenticated user
+        $user = Auth::user();
+        
+        // Store user data in session with all roles
+        session([
+            'user_id' => $user->id,
+            'user_role' => $user->roles->pluck('id')->implode(','),
+            'role_name' => $user->roles->pluck('name')->implode(',')
+        ]);
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

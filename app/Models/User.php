@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -34,9 +35,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
-    public function hasRole(string $role): bool
+    public function hasRole($role)
     {
-        return $this->roles->pluck('name')->contains($role);
+        return Cache::remember('user_roles_'.$this->id, now()->addMinutes(480), function () use ($role) {
+            return $this->roles()->where('name', $role)->exists();
+        });
     }
     public function hasPermissionTo(string $featureName, string $permission): bool
     {
@@ -83,3 +86,5 @@ class User extends Authenticatable
             ->exists();
     }
 }
+
+

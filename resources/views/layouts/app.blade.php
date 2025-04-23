@@ -190,6 +190,11 @@
       </header>
       <div class="body flex-grow-1">
         <div class="container-lg px-4 app-width">
+          <div class="row align-items-center mb-4">
+            <div class="col">
+          {{ $header ?? '' }}
+            </div>
+          </div>
         {{ $slot }}
 
             
@@ -201,6 +206,7 @@
         <div>Doxadigital 2025 </div>
 
       </footer>
+      @stack('styles')
       @stack('scripts')
           <!-- Add this before closing body tag -->
     <script src="{{ asset('js/toast-notification.js') }}"></script>

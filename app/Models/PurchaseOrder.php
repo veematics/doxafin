@@ -12,11 +12,30 @@ class PurchaseOrder extends Model
         'poNo',
         'poClient',
         'poStatus',
-        'poTerm'
+        'poTerm',
+        'poValue',
+        'poCurrency',
+        'poStartDate',
+        'poEndDate',
+        'poFiles',
+        'created_by'
     ];
+
+    protected $casts = [
+        'poStartDate' => 'date',
+        'poEndDate' => 'date',
+        'poFiles' => 'json'
+    ];
+
+    public static $poStatus = ['Draft', 'Pending', 'Approved', 'Rejected'];
 
     public function client()
     {
         return $this->belongsTo(Client::class, 'poClient');
+    }
+
+    public function serviceItems()
+    {
+        return $this->hasMany(ServicePo::class, 'poID');
     }
 }

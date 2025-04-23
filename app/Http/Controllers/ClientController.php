@@ -152,6 +152,7 @@ class ClientController extends Controller
             'npwp' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
             'assign_to' => 'required|exists:users,id',
+            'payment_terms' => 'nullable|string', // Add this line
             'notes' => 'nullable|string'
         ]);
 
@@ -256,5 +257,23 @@ class ClientController extends Controller
         return redirect()->route('clients.index')
             ->with('success', 'Client deleted successfully');
     }
+    public function getClientDetails(Client $client)
+    {
+        return response()->json([
+            'id' => $client->id,
+            'company_name' => $client->company_name,
+            'company_alias' => $client->company_alias,
+            'company_code' => $client->company_code,
+            'company_address' => $client->company_address,
+            'npwp' => $client->npwp,
+            'website' => $client->website,
+            'payment_terms' => $client->payment_terms,
+            'notes' => $client->notes,
+            'assigned_user' => $client->assignedUser ? [
+                'id' => $client->assignedUser->id,
+                'name' => $client->assignedUser->name
+            ] : null
+        ]);
+    }   
 }
 

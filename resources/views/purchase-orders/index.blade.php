@@ -1,36 +1,228 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Purchase Orders</h1>
-            <a href="{{ route('purchase-orders.create') }}" class="btn btn-primary">Create New PO</a>
-        </div>
+    <div class="body flex-grow-1 px-3">
+        <div class="container-lg">
+            <div class="row align-items-center mb-4">
+                <div class="col">
+                    <div class="fs-2 fw-semibold">Purchase Orders</div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                            <li class="breadcrumb-item active">Purchase Orders</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ route('purchase-orders.add') }}" class="btn btn-primary">
+                        <i class="cil-plus"></i> New Purchase Order
+                    </a>
+                </div>
+            </div>
 
-        <div class="bg-white shadow-md rounded-lg">
-            <table class="min-w-full">
-                <thead>
-                    <tr>
-                        <th>PO Number</th>
-                        <th>Client</th>
-                        <th>Status</th>
-                        <th>Payment Terms</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($purchaseOrders as $po)
-                        <tr>
-                            <td>{{ $po->poNo }}</td>
-                            <td>{{ $po->client->name }}</td>
-                            <td>{{ $po->poStatus }}</td>
-                            <td>{{ $po->poTerm }}</td>
-                            <td>
-                                <a href="{{ route('purchase-orders.edit', $po->poID) }}" class="btn btn-sm btn-primary">Edit</a>
-                                <a href="{{ route('purchase-orders.show', $po->poID) }}" class="btn btn-sm btn-info">View</a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search PO Number or Client..." id="searchInput">
+                                <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                    <i class="cil-magnifying-glass"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4 ms-auto text-end">
+                            <select class="form-select" id="perPageSelect" style="width: auto; display: inline-block;">
+                                <option value="20">20 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                                <option value="500">500 per page</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>PO Number</th>
+                                    <th>Client</th>
+                                    <th>Value</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Detail Info Snapshot</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($purchaseOrders as $po)
+                                    <tr class="border-t">
+                                        <td class="py-3">{{ $po->poNo }}</td>
+                                        <td>{{ $po->client->company_name }}</td>
+                                        <td>{{ $po->poCurrency }} {{ number_format($po->poValue, 0) }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($po->poStartDate)->format('d M Y') }}</td>
+                                        <td>{{ $po->poEndDate ? \Carbon\Carbon::parse($po->poEndDate)->format('d M Y') : '-' }}</td>
+                                        <td>Services:
+                                            <span class="badge bg-primary cursor-pointer" 
+                                                  onclick="showServices({{ $po->poID }})">
+                                                {{ $po->serviceItems->count() }}
+                                            </span>
+                                            <br/>
+                                            Invoices:
+                                            <span class="badge bg-primary cursor-pointer"
+                                                  onclick="showInvoices({{ $po->poID }})">0
+                                                {{-- {{ $po->invoiceItems->count() }} --}}
+                                            </span>
+                                            <br/>
+                                            Payment:
+                                            
+                                            <span class="badge bg-primary cursor-pointer"
+                                                  onclick="showInvoices({{ $po->poID }})">0
+                                                {{-- {{ $po->invoiceItems->count() }} --}}
+                                            </span>
+                                            <br/>
+                                            Outstanding:
+                                            
+                                            <span class="badge bg-primary cursor-pointer"
+                                                  onclick="showInvoices({{ $po->poID }})">0
+                                                {{-- {{ $po->invoiceItems->count() }} --}}
+                                            </span>
+                                        </td>
+                                        <td>{{ $po->poStatus }}</td>
+                                        <td class="text-right">
+                                            <a href="{{ route('purchase-orders.show', $po) }}" class="btn btn-sm btn-secondary">
+                                                <i class="cil-magnifying-glass"></i>
+                                            </a>
+                                            <a href="{{ route('purchase-orders.edit', $po) }}" class="btn btn-sm btn-primary">
+                                                <i class="cil-pencil"></i>
+                                            </a>
+                                            <form action="{{ route('purchase-orders.destroy', $po) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                                    <i class="cil-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">No purchase orders found</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if(method_exists($purchaseOrders, 'links'))
+                        <div class="mt-3">
+                            {{ $purchaseOrders->links() }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    window.location.href = "{{ route('purchase-orders.index') }}?search=" + encodeURIComponent(searchTerm);
+                }
+            }
+            
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Items per page selection
+            const perPageSelect = document.getElementById('perPageSelect');
+            perPageSelect.addEventListener('change', function() {
+                window.location.href = "{{ route('purchase-orders.index') }}?perPage=" + this.value;
+            });
+
+            // Set current per page value
+            const urlParams = new URLSearchParams(window.location.search);
+            const perPage = urlParams.get('perPage');
+            if (perPage) {
+                perPageSelect.value = perPage;
+            }
+        });
+    </script>
+    @endpush
+
+    @push('scripts')
+    <script>
+        function showServices(poId) {
+            // AJAX call to fetch services
+            fetch(`/po/${poId}/services`)
+                .then(response => response.json())
+                .then(data => {
+                    // Create modal content
+                    let html = `<div class="modal-header">
+                                    <h5 class="modal-title">Services for PO ${data.poNo}</h5>
+                                    <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Service Name</th>
+                                                <th>Value</th>
+                                                <th>Recurring</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                    
+                    data.services.forEach(service => {
+                        html += `<tr>
+                                    <td>${service.serviceName}</td>
+                                    <td>${data.poCurrency} ${Math.floor(service.value).toLocaleString()}</td>
+                                    <td>${service.is_recurring ? 'Yes' : 'No'}</td>
+                                </tr>`;
+                    });
+                    
+                    html += `</tbody></table></div>`;
+                    
+                    // Show modal
+                    const modal = new coreui.Modal(document.getElementById('servicesModal'));
+                    document.getElementById('servicesModal').querySelector('.modal-content').innerHTML = html;
+                    modal.show();
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for success notification
+            const urlParams = new URLSearchParams(window.location.search);
+            const poId = urlParams.get('po');
+            const status = urlParams.get('status');
+            const valid = urlParams.get('valid');
+            
+            if (valid === '1' && poId) {
+                window.toast.show(`PO#${poId} registered successfully. <br/>Status: ${status} `, 'success');
+            }
+
+            // ... existing search functionality code ...
+        });
+    </script>
+    @endpush
+
+
+    <div class="modal fade" id="servicesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Content will be loaded dynamically -->
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -1,33 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 Forbidden</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .error-container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
-    <div class="error-container">
-        <h1 class="text-danger">403 Forbidden</h1>
-        <p class="lead">{{ $message ?? 'You do not have permission to view this page.' }}</p>
-        <a href="{{ url('/') }}" class="btn btn-primary mt-3">Return to Homepage</a>
-    </div>
-</body>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }} - Access Denied</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+
+        <!-- Scripts -->
+        @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    </head>
+    <body class="bg-light min-vh-100 d-flex align-items-center justify-content-center py-4">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5">
+                    <div class="text-center mb-4">
+                        <h1>Doxadigital Core App</h1>
+                        <a href="/">
+                            <svg class="icon icon-3xl text-primary">
+                                <use xlink:href="{{ asset('icons/coreui.svg#full') }}"></use>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-4">
+                                <svg class="text-danger" style="width: 64px; height: 64px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            
+                            <h2 class="text-danger mb-3">Access Denied</h2>
+                            
+                            <div class="text-muted mb-4">
+                                <p class="mb-2">{{ $exception->getMessage() ?: 'You do not have permission to access this page.' }}</p>
+                                <p class="small">Error Code: 403</p>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{{ route('dashboard') }}" class="btn btn-primary">
+                                    Return to Dashboard
+                                </a>
+                                
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
