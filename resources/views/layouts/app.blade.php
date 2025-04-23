@@ -72,7 +72,7 @@
          
 
       </ul>
-
+      <x-debug-info :featureId="5"/>
     </div>
 
     <!-- ... rest of the content remains unchanged ... -->
