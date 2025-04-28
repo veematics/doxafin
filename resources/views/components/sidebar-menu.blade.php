@@ -1,12 +1,13 @@
 
 @php
     function icon($name) {
-        return '<svg class="nav-icon"><use xlink:href="http://fin.doxa/assets/icons/free/free.svg#' . $name . '"></use></svg>';
+        return '<svg class="nav-icon"><use xlink:href="' . url('assets/icons/free/free.svg') . '#' . $name . '"></use></svg>';
     }
 @endphp
 
 
     @foreach($menuItems as $item)
+  
         <li class="nav-item {{ count($item['children']) > 0 ? 'nav-group' : '' }}">
             <a class="nav-link {{ count($item['children']) > 0 ? 'nav-group-toggle' : '' }}" href="{{ $item['path'] ?? '#' }}">
                 {!! icon($item['icon']) !!}

@@ -130,6 +130,7 @@ Route::get('/dashboard', function () {
 
     
     
+<<<<<<< HEAD
     // Client routes
     Route::prefix('clients')->name('clients.')->group(function () {
         // Base client routes
@@ -171,6 +172,9 @@ Route::get('/dashboard', function () {
         });
 
     });
+=======
+  
+>>>>>>> 08efe325cdca44eb6765054f06a788b15a786eab
     // Update the CSV data routes
     // CSV Data Routes - simplified version
     Route::middleware('auth')->group(function () {
