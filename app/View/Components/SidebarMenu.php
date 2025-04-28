@@ -19,8 +19,12 @@ class SidebarMenu extends Component
         $noCache = Request::get('no_cache') == 1;
 
         if ($noCache) {
+<<<<<<< HEAD
             $this->menuItems = $this->getSidebarMenuItems($userId);  // Added missing $userId parameter
           
+=======
+            $this->menuItems = $this->getSidebarMenuItems($userId);
+>>>>>>> 08efe325cdca44eb6765054f06a788b15a786eab
             Cache::put($cacheKey, $this->menuItems, now()->addDay());
         } else {
             $this->menuItems = Cache::remember($cacheKey, now()->addDay(), function () use ($userId) {
@@ -73,9 +77,15 @@ class SidebarMenu extends Component
         if ($featureId === null) {
             return true; // Set 'can_view' directly to 1 if feature_id is null
         }
+<<<<<<< HEAD
        
         return (isset($userPermissions[$featureId][0]->can_view) && ($userPermissions[$featureId][0]->can_view >= 1));
              
+=======
+
+        // Check 'can_view' parameter from user_permissions cache
+        return isset($userPermissions[$featureId][0]->can_view) && $userPermissions[$featureId][0]->can_view >= 1;
+>>>>>>> 08efe325cdca44eb6765054f06a788b15a786eab
     }
 
     public function render()
