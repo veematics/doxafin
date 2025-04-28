@@ -38,4 +38,16 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(ServicePo::class, 'poID');
     }
+
+    // Add new relationship for invoices
+    public function invoices()
+    {
+        return $this->hasMany(InvoicePo::class, 'invoicepoID');
+    }
+
+    // Add method to check if PO can be deleted
+    public function canDelete()
+    {
+        return $this->invoices()->count() === 0;
+    }
 }

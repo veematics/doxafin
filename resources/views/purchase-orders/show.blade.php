@@ -1,9 +1,20 @@
 <x-app-layout>
-
+@php
+        $featureId = 5;
+         $userId = auth()->id();
+        $cacheKey = 'user_permissions_' . $userId;
+        $permissions = Cache::get($cacheKey);
+        $can_view = $permissions[$featureId][0]->can_view;
+        $can_create = $permissions[$featureId][0]->can_create;
+        $can_approve = $permissions[$featureId][0]->can_approve;
+        $can_edit = $permissions[$featureId][0]->can_edit;
+        $can_delete = $permissions[$featureId][0]->can_delete;
+    @endphp
   
 <x-slot name="header">
         <h1 class="text-2xl font-bold mb-6">Purchase Order Monitoring</h1>
     </x-slot>
+    
     <div class="container mx-auto px-4 py-6">
         <div class="row">
             <div class="col-md-6">
@@ -79,7 +90,14 @@
                         <p class="text-muted">Status: <strong>{{ $purchaseOrder->poStatus ?? 'Not Set' }}</strong></p>
                         Operation:<br/>
                         <ul>
-                            <li>Edit</li>
+                        @if (($purchaseOrder->poStatus == "Draft" && $can_edit=='1')||$can_approve=='1')
+                          
+                            <li><a href="{{ route('purchase-orders.edit', $purchaseOrder) }}">Edit</a></li>
+                            @endif
+
+                            @if ($purchaseOrder->poStatus == "Draft" && $can_edit=='1')
+                            <li><a href="#" onclick="confirmApproval(event, {{ $purchaseOrder->id }})">Submit for Approval</a></li>
+                            @endif
                             <li>Change Request</li>
                             <li>Add Activity Logs</li>
                         </ul>
@@ -120,4 +138,8 @@
             </div>
         </div>
     </div>
+    @component('components.approval-modal')
+    @endcomponent
+
+   
 </x-app-layout>

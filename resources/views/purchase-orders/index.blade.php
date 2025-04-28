@@ -102,10 +102,14 @@
                                         <td>{{ $po->poStatus }}</td>
                                         <td class="text-right">
                                             <div class="d-flex flex-column">
+                                            @if (($po->poStatus == "Draft" && $can_edit=='1')||$can_approve=='1')
+                                            <a href="{{ route('purchase-orders.edit', $po->poID) }}" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-pencil me-1"></i>Edit</a>
+                                                 
+                                            @endif
                                                 @if ($po->poStatus == "Draft")
-                                                    <a href="{{ route('purchase-orders.edit', $po) }}" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-pencil me-1"></i>Edit</a>
+                                                     
+                                                    <a href="#" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem" onclick="confirmApproval(event, {{ $po->poID }}, '{{ route('purchase-orders.approval-request', $po->poID) }}')"><i class="cil-check-circle me-1"></i>Submit For Approval</a>  
                                                     @if ( $can_approve!=1)
-                                                    <a href="{{ route('purchase-orders.edit', $po) }}" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-check-circle me-1"></i>Submit PO Approval</a>  
                                                     @endif
                                                 @endif
                                                                                                
@@ -142,45 +146,11 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            
-            function performSearch() {
-                const searchTerm = searchInput.value.trim();
-                if (searchTerm) {
-                    window.location.href = "{{ route('purchase-orders.index') }}?search=" + encodeURIComponent(searchTerm);
-                }
-            }
-            
-            searchButton.addEventListener('click', performSearch);
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    performSearch();
-                }
-            });
-
-            // Items per page selection
-            const perPageSelect = document.getElementById('perPageSelect');
-            perPageSelect.addEventListener('change', function() {
-                window.location.href = "{{ route('purchase-orders.index') }}?perPage=" + this.value;
-            });
-
-            // Set current per page value
-            const urlParams = new URLSearchParams(window.location.search);
-            const perPage = urlParams.get('perPage');
-            if (perPage) {
-                perPageSelect.value = perPage;
-            }
-        });
-    </script>
-    @endpush
+   
 
     @push('scripts')
     <script>
+      
         function showServices(poId) {
             // AJAX call to fetch services
             fetch(`/po/${poId}/services`)
@@ -235,6 +205,9 @@
     </script>
     @endpush
 
+
+    @component('components.approval-modal')
+    @endcomponent
 
     <div class="modal fade" id="servicesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">

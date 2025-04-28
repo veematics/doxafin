@@ -12,10 +12,18 @@ class RequestChangeController extends Controller
     public function index()
     {
         $requestChanges = RequestChange::with(['creator', 'approver', 'changeable'])
+            ->where('is_archived', false)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('request-changes.index', compact('requestChanges'));
+        $archivedChanges = RequestChange::with(['creator', 'approver', 'changeable', 'client'])
+            ->where('is_archived', true)
+            ->orderBy('archived_at', 'desc')
+            ->paginate(10);
+
+        $clients = \App\Models\Client::orderBy('company_name')->get();
+
+        return view('request-changes.index', compact('requestChanges', 'archivedChanges', 'clients'));
     }
 
     public function create()
@@ -29,18 +37,26 @@ class RequestChangeController extends Controller
             'changeable_type' => 'required|string',
             'changeable_id' => 'required|integer',
             'notes' => 'required|string|max:500',
-            'changes' => 'required|json'
+            'changes' => 'required|json',
+            'data' => 'required|json'
         ]);
 
         if (!FeatureAccess::canCreate('request_changes')) {
             abort(403, 'Unauthorized action.');
         }
 
+        // Validate if referenced model exists
+        $model = $validated['changeable_type']::find($validated['changeable_id']);
+        if (!$model) {
+            return back()->withInput()->with('error', 'The referenced record does not exist.');
+        }
+
         try {
             $requestChange = RequestChange::create([
                 ...$validated,
                 'status' => 'pending',
-                'created_by' => Auth::id()
+                'created_by' => Auth::id(),
+                'data' => json_decode($validated['data'], true)
             ]);
 
             return redirect()->route('request-changes.index')
@@ -103,6 +119,45 @@ class RequestChangeController extends Controller
                 ->with('success', 'Request change rejected successfully.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to reject request: ' . $e->getMessage());
+        }
+    }
+
+    public function archive(RequestChange $requestChange)
+    {
+        if (!FeatureAccess::canEdit('request_changes')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $requestChange->update([
+                'is_archived' => true,
+                'archived_at' => now(),
+                'original_status' => $requestChange->status
+            ]);
+
+            return redirect()->route('request-changes.index')
+                ->with('success', 'Request change archived successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to archive request: ' . $e->getMessage());
+        }
+    }
+
+    public function unarchive(RequestChange $requestChange)
+    {
+        if (!FeatureAccess::canEdit('request_changes')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $requestChange->update([
+                'is_archived' => false,
+                'archived_at' => null
+            ]);
+
+            return redirect()->route('request-changes.index')
+                ->with('success', 'Request change unarchived successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to unarchive request: ' . $e->getMessage());
         }
     }
 }

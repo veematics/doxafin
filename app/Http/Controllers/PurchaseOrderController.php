@@ -8,10 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\FeatureAccess;
+use App\Http\Controllers\RequestChangeController;
 
 class PurchaseOrderController extends Controller
 {
-    protected $debug = 0; // Add this line - set to 1 to enable logging, 0 to disable
+    protected $debug = 1; // Add this line - set to 1 to enable logging, 0 to disable
 
     public function index(Request $request)
     {
@@ -37,6 +38,7 @@ class PurchaseOrderController extends Controller
     public function create()
     {
         $userId = auth()->id();
+        $userName = auth()->user()->name;
         $featureId = FeatureAccess::getFeatureID('Clients');
         
   
@@ -222,6 +224,7 @@ class PurchaseOrderController extends Controller
     
         // Get clients based on user's permission level
         $userId = auth()->id();
+        $userName = auth()->user()->name;
         $featureId = FeatureAccess::getFeatureID('Clients');
         $permissions = Cache::get('user_permissions_' . $userId);
     
@@ -276,6 +279,102 @@ class PurchaseOrderController extends Controller
                 ];
             })
         ]);
+    }
+
+    public function approvalRequest(Request $request, PurchaseOrder $purchaseOrder)
+    {
+       
+        // Step 1 - Initiate approval request
+        if ($this->debug) {
+            \Log::info('Starting approval request for PO: ' . $purchaseOrder->poNo);
+        }
+       
+        $userId = auth()->id();
+        $userName = auth()->user()->name;
+        $featureId = FeatureAccess::getFeatureID('Purchase Order');
+        
+        $canedit=FeatureAccess::canEditById($userId, $featureId);
+      
+        // a. Check can_edit permission
+        if (!$canedit) {
+            if ($this->debug) {
+                \Log::warning('User lacks edit permission for PO approval', ['user_id' => $userId]);
+            }
+            abort(403, 'Unauthorized action');
+        }
+       
+        // b. Validate if current poStatus is 'Draft'
+        if ($purchaseOrder->poStatus !== 'Draft') {
+            if ($this->debug) {
+                \Log::warning('Invalid PO status for approval request', 
+                    ['current_status' => $purchaseOrder->poStatus, 'expected_status' => 'Draft']);
+            }
+            abort(403, 'Invalid Status for approval request');
+        }
+        
+            
+        // Step 2 - Prepare JSON data for change tracking
+        
+        $changeData = [
+            'controller' => 'PurchaseOrderController',
+            'title' => 'PO#'.$purchaseOrder->poNo." Approval Request by ".$userName,
+            'table' => 'purchase_orders',
+            'idField' => 'poID',
+            'id' => $purchaseOrder->poID,
+            'user_id' => $userId,
+            'changes' => [
+                [
+                    'label' => 'Status',
+                    'field' => 'poStatus',
+                    'before' => 'Draft',
+                    'after' => 'Request Approval'
+                ]
+            ]
+        ];
+
+        if ($this->debug) {
+            \Log::info('Change data prepared', $changeData);
+        }
+        dd($changeData);
+         // Step 3 - Store Change Tracking
+         $requestChangeController = new RequestChangeController();
+         $requestChangeController->store(new Request($changeData));
+         if ($this->debug) {
+             \Log::info('Change tracking stored successfully');
+         }
+
+         dd('Tracking done successfully');
+         // Step 4- Store New Status
+        $purchaseOrder->update([
+            'poStatus' => 'Request Approval',
+        ]);
+
+        if ($this->debug) {
+            \Log::info('PO status updated successfully');
+        }
+       
+     
+        return redirect()
+            ->route('purchase-orders.index', ['po' => $purchaseOrder->poNo, 'status' => $purchaseOrder->poStatus, 'valid' => 1])
+            ->with('success', 'Purchase Order status updated successfully');
+    }
+
+    public function destroy(PurchaseOrder $purchaseOrder)
+    {
+        if (!$purchaseOrder->canDelete()) {
+            $errorMessage = '';
+            
+            if ($purchaseOrder->invoices()->count() > 0) {
+                $errorMessage = 'Cannot delete Purchase Order: There are invoices associated with this PO.';
+            } elseif ($purchaseOrder->serviceItems()->count() > 0) {
+                $errorMessage = 'Cannot delete Purchase Order: There are services attached to this PO.';
+            }
+
+            return back()->with('error', $errorMessage);
+        }
+
+        $purchaseOrder->delete();
+        return redirect()->route('purchase-orders.index')->with('success', 'Purchase Order deleted successfully.');
     }
 }
 

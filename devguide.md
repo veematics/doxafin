@@ -1,4 +1,60 @@
 # Development Guide
+## Request Changes Module
+### Description
+This JSON structure is designed to track historical changes for a main dataset and its related datasets.
+
+- 'title': Title Summary of the changes.
+- `class`: Name of the main table where the changes occur.
+- `table`: Name of the main table where the changes occur.
+- `idField`: Primary key field name of the main table.
+- `id`: Specific record ID in the main table that the changes are related to.
+- `changes`: List of changes in the main table. Each change must include:
+  - `label`: Friendly name or description of the field.
+  - `field`: Actual database field name.
+  - `before`: Value before the change.
+  - `after`: Value after the change.
+- `relation`: (Optional) Object that defines changes in a related table. It includes:
+  - `table`: Name of the related table.
+  - `idField`: Primary key field name of the related table.
+  - `id`: Specific record ID in the related table.
+  - `changes`: List of changes in the related table following the same structure as the main changes.
+
+This format supports tracking multiple fields per record, including changes across parent and child relationships (e.g., purchase order and associated invoices).
+``` Data Samples```
+
+```json
+{
+  "table": "purchase_order",
+  "idField": "poID",
+  "id": 1,
+  "changes": [
+    {
+      "label": "Project Value",
+      "field": "poValue",
+      "before": "1000",
+      "after": "1500"
+    },
+    {
+      "label": "Project Term",
+      "field": "poTerm",
+      "before": "Test",
+      "after": "Helo"
+    }
+  ],
+  "relation": {
+    "table": "invoice_po",
+    "idField": "invoiceID",
+    "id": 20,
+    "changes": [
+      {
+        "label": "Invoice Value",
+        "field": "invoiceValue",
+        "before": "1000",
+        "after": "1500"
+      }
+    ]
+  }
+}
 
 ## Feature Access Protection
 

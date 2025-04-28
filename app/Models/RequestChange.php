@@ -13,17 +13,24 @@ class RequestChange extends Model
     protected $fillable = [
         'changeable_type',
         'changeable_id',
+        'category',
         'notes',
+        'data',
         'status',
         'changes',
         'created_by',
         'approved_by',
-        'approved_at'
+        'approved_at',
+        'is_archived',
+        'archived_at',
+        'original_status'
     ];
 
     protected $casts = [
         'changes' => 'array',
-        'approved_at' => 'datetime'
+        'approved_at' => 'datetime',
+        'archived_at' => 'datetime',
+        'is_archived' => 'boolean'
     ];
 
     public function changeable(): MorphTo

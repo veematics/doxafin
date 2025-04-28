@@ -5,7 +5,8 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\AppFeatureController;
 use App\Http\Controllers\AppSetupController;
-use App\Http\Controllers\RoleController;  // Add this line
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RequestChangeController;  // Add this line
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\InboxMessageController;
@@ -213,11 +214,28 @@ Route::get('/dashboard', function () {
         Route::delete('/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
         Route::get('/{purchaseOrder}/services', [PurchaseOrderController::class, 'services'])
             ->name('services');
+        Route::get('/{purchaseOrder}/approval-request', [PurchaseOrderController::class, 'approvalRequest'])
+            ->name('approval-request');
         });
     // Route::middleware('auth')->prefix('api')->group(function () {
     //     Route::get('/clients/{client}', [ClientController::class, 'getClientDetails']);
     // });
 });
+Route::middleware(['auth'])->prefix('rc')->name('request-changes.')->group(function () {
+    Route::get('/', [RequestChangeController::class, 'index'])->name('index');
+    Route::get('/create', [RequestChangeController::class, 'create'])->name('create');
+    Route::post('/', [RequestChangeController::class, 'store'])->name('store');
+    Route::get('/{requestChange}', [RequestChangeController::class, 'show'])->name('show');
+    Route::get('/{requestChange}/edit', [RequestChangeController::class, 'edit'])->name('edit');
+    Route::put('/{requestChange}', [RequestChangeController::class, 'update'])->name('update');
+    Route::delete('/{requestChange}', [RequestChangeController::class, 'destroy'])->name('destroy');
+    Route::post('/{requestChange}/approve', [RequestChangeController::class, 'approve'])->name('approve');
+    Route::post('/{requestChange}/reject', [RequestChangeController::class, 'reject'])->name('reject');
+    Route::post('/{requestChange}/request-revision', [RequestChangeController::class, 'requestRevision'])->name('request-revision');
+    Route::post('/{requestChange}/archive', [RequestChangeController::class, 'archive'])->name('archive');
+    Route::post('/{requestChange}/unarchive', [RequestChangeController::class, 'unarchive'])->name('unarchive');
+});
+ 
 require __DIR__.'/auth.php';
 
 
