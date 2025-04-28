@@ -425,7 +425,6 @@
                  }
 
                 cardProgressDiv.classList.remove('d-none'); // Show for steps 2, 3, 4
-                 document.getElementById('progressPO').classList.add('d-none'); // Hide main progress bar when summary is shown
 
                 const currentStepText = document.querySelector(`.step[data-step="${currentStep}"] .step-text`).textContent;
                 const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
@@ -910,10 +909,7 @@
                  const item = row.cells[1].textContent;
                  const serviceId = row.dataset.serviceId;
 
-                 if (selectedServicesTableBody.querySelector(`tr[data-service-id="${serviceId}"]`)) {
-                      alert(`"${item}" is already added.`);
-                      return;
-                 }
+               
 
                  const emptyRow = selectedServicesTableBody.querySelector('tr.no-data');
                  if (emptyRow) emptyRow.remove();

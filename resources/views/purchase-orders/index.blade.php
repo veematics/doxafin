@@ -1,4 +1,15 @@
 <x-app-layout>
+    @php
+        $featureId = 5;
+         $userId = auth()->id();
+        $cacheKey = 'user_permissions_' . $userId;
+        $permissions = Cache::get($cacheKey);
+        $can_view = $permissions[$featureId][0]->can_view;
+        $can_create = $permissions[$featureId][0]->can_create;
+        $can_approve = $permissions[$featureId][0]->can_approve;
+        $can_edit = $permissions[$featureId][0]->can_edit;
+        $can_delete = $permissions[$featureId][0]->can_delete;
+    @endphp
     <div class="body flex-grow-1 px-3">
         <div class="container-lg">
             <div class="row align-items-center mb-4">
@@ -90,19 +101,26 @@
                                         </td>
                                         <td>{{ $po->poStatus }}</td>
                                         <td class="text-right">
-                                            <a href="{{ route('purchase-orders.show', $po) }}" class="btn btn-sm btn-secondary">
-                                                <i class="cil-magnifying-glass"></i>
-                                            </a>
-                                            <a href="{{ route('purchase-orders.edit', $po) }}" class="btn btn-sm btn-primary">
-                                                <i class="cil-pencil"></i>
-                                            </a>
-                                            <form action="{{ route('purchase-orders.destroy', $po) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
-                                                    <i class="cil-trash"></i>
-                                                </button>
-                                            </form>
+                                            <div class="d-flex flex-column">
+                                                @if ($po->poStatus == "Draft")
+                                                    <a href="{{ route('purchase-orders.edit', $po) }}" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-pencil me-1"></i>Edit</a>
+                                                    @if ( $can_approve!=1)
+                                                    <a href="{{ route('purchase-orders.edit', $po) }}" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-check-circle me-1"></i>Submit PO Approval</a>  
+                                                    @endif
+                                                @endif
+                                                                                               
+                                                <a href="{{ route('purchase-orders.show', $po) }}" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-description me-1"></i>View Details</a>
+                                                @if ($po->poStatus != "Draft")
+                                                 <a href="" class="text-decoration-none mb-1" style="font-size: 0.9rem; line-height: 0.9rem"><i class="cil-sync me-1"></i>Request Changes</a>
+                                                @endif
+                                                @if ( $can_delete==1)
+                                                <form action="{{ route('purchase-orders.destroy', $po) }}" method="POST" class="mb-1">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-link p-0 text-decoration-none text-danger" style="font-size: 0.9rem; line-height: 0.9rem" onclick="return confirm('Are you sure?')"><i class="cil-trash me-1"></i>Delete</button>
+                                                </form>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

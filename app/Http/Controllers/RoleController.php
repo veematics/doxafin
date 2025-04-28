@@ -46,7 +46,7 @@ class RoleController extends Controller
                 $featureRole = [
                     'role_id' => $role->id,
                     'feature_id' => $featureId,
-                    'can_view' => isset($permissions['can_view']) ? (int)$permissions['can_view'] : null,
+                    'can_view' => isset($permissions['can_view']) ? (int)$permissions['can_view'] : 0,
                     'can_create' => isset($permissions['can_create']) ? 1 : 0,
                     'can_edit' => isset($permissions['can_edit']) ? 1 : 0,
                     'can_delete' => isset($permissions['can_delete']) ? 1 : 0,
@@ -101,11 +101,11 @@ class RoleController extends Controller
         // Process permissions
         foreach ($request->permissions ?? [] as $featureId => $permissions) {
             $permissionData = [
-                'can_create' => isset($permissions['can_create']),
-                'can_edit' => isset($permissions['can_edit']),
-                'can_delete' => isset($permissions['can_delete']),
-                'can_approve' => isset($permissions['can_approve']),
-                'can_view' => isset($permissions['can_view']) ? (int)$permissions['can_view'] : null,
+                'can_create' => isset($permissions['can_create']) ? 1 : 0,
+                'can_edit' => isset($permissions['can_edit']) ? 1 : 0,
+                'can_delete' => isset($permissions['can_delete']) ? 1 : 0,
+                'can_approve' => isset($permissions['can_approve']) ? 1 : 0,
+                'can_view' => isset($permissions['can_view']) ? (int)$permissions['can_view'] : 0,
             ];
     
             // Handle additional permissions if they exist

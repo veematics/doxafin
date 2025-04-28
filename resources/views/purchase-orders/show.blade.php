@@ -93,6 +93,8 @@
                             <br/>
                                 Invoice Completed:0<br/>
                                 Active Invoice Due:0<br/>
+                                Total Invoice Value:Rp. 0<br/>
+                                Total Remaining Balance: Rp. 0<br/>
                         </p>
                     </div>
                 </div>
@@ -101,9 +103,10 @@
                     <div class="card-header">Payment Status</div>
                     <div class="card-body">
                         <p class="text-muted"><p class="text-muted">
-                               No. Payment:0<br/>
-                                Payment Value:Rp. 0<br/>
-                                Remaining Payment:Rp. 0<br/>
+                               No of Payment: 0<br/>
+                               Total Payment Value:Rp. 0<br/>
+                               Remaining Payment Value:Rp. 0<br/>
+                                
                         </p></p>
                     </div>
                 </div>
