@@ -95,6 +95,10 @@ Route::get('/dashboard', function () {
         Route::get('/roles', function () {
             return view('playground.roles');
         })->name('roles');
+
+        // Email Testing Routes
+        Route::get('/email', [\App\Http\Controllers\Playground\EmailController::class, 'show'])->name('email');
+        Route::post('/email/send', [\App\Http\Controllers\Playground\EmailController::class, 'send'])->name('email.send');
     
         Route::get('/select2', function () {
             return view('playground.select2');
@@ -106,6 +110,7 @@ Route::get('/dashboard', function () {
         Route::get('/memberroles', function () {
             return view('playground.demockeditor');
         })->name('memberroles');
+        
     });
 
     // Inbox routes
@@ -192,6 +197,7 @@ Route::get('/dashboard', function () {
     // Purchase Order Routes
     Route::middleware(['auth'])->prefix('po')->name('purchase-orders.')->group(function () {
         Route::get('/', [PurchaseOrderController::class, 'index'])->name('index');
+        Route::get('/approve/{po}', [PurchaseOrderController::class, 'approve'])->name('approve');
         Route::resource('purchase-orders', PurchaseOrderController::class)
             ->except(['create', 'edit'])
             ->names([

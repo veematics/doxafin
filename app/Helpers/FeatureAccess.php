@@ -159,6 +159,22 @@ class FeatureAccess
         });
     }
 
+    public static function findApprovalUsers($featureId)
+    {
+        return DB::table('users')
+            ->join('role_user', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->join('feature_role', function($join) use ($featureId) {
+                $join->on('feature_role.role_id', '=', 'roles.id')
+                     ->where('feature_role.feature_id', '=', $featureId)
+                     ->where('feature_role.can_approve', '=', 1);
+            })
+            ->where('roles.name', 'like', '%Approval%')
+            ->select('users.id', 'users.name', 'users.email')
+            ->distinct()
+            ->get();
+    }
+
     public static function check($userId, $featureName, $permission)
     {
         // Get feature ID by name

@@ -7,8 +7,12 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use App\Helpers\FeatureAccess;
 use App\Http\Controllers\RequestChangeController;
+use App\Mail\PurchaseOrderApprovalRequest;
+Use App\Helpers\MailHelper;
+use App\Models\InboxMessage;
 
 class PurchaseOrderController extends Controller
 {
@@ -284,6 +288,7 @@ class PurchaseOrderController extends Controller
     public function approvalRequest(Request $request, PurchaseOrder $purchaseOrder)
     {
        
+       
         // Step 1 - Initiate approval request
         if ($this->debug) {
             \Log::info('Starting approval request for PO: ' . $purchaseOrder->poNo);
@@ -302,7 +307,7 @@ class PurchaseOrderController extends Controller
             }
             abort(403, 'Unauthorized action');
         }
-       
+        
         // b. Validate if current poStatus is 'Draft'
         if ($purchaseOrder->poStatus !== 'Draft') {
             if ($this->debug) {
@@ -312,33 +317,96 @@ class PurchaseOrderController extends Controller
             abort(403, 'Invalid Status for approval request');
         }
         
+        // Step 2 - Find approval users and Email
+        $approvalUsers = FeatureAccess::findApprovalUsers($featureId);
+        $approvalUrl = route('purchase-orders.approve', ['po' => $purchaseOrder->poNo]);
+        $subject = 'PO Approval Request #'.$purchaseOrder->poNo." By ".$userName;
+
+
+        $inbox_title = "PO#".$purchaseOrder->poNo." Approval Request by ".$userName;
+        $inbox_message= "Click <a href='".$approvalUrl."'>here</a> to view the PO#".$purchaseOrder->poNo." Approval Request by ".$userName;
+        $inbox_message_category= "system";
+        $inbox_sent_from=1; // 1=system, 1=user
+        $inbox_priority_status=3;
+        
+        if ($this->debug) {
+            \Log::info('Approval users found', $approvalUsers->toArray());
+        }   else{
+            \Log::info('Approval users not found');
+        }
+     
+        // Step 2b - Send email notification and internal notification
+        if ($approvalUsers->count() > 0) {
             
-        // Step 2 - Prepare JSON data for change tracking
+         
+            
+            foreach ($approvalUsers as $approver) {
+                // Render email template
+                $message = view('emails.purchase-orders.approval-request', [
+                    'purchaseOrder' => $purchaseOrder,
+                    'approvalUrl' => $approvalUrl,
+                    'requesterName' => auth()->user()->name
+                ])->render();
+                
+                // Send email using MailHelper
+                MailHelper::sendEmail(
+                    $approver->name,
+                    $approver->email,
+                    $subject,
+                    $message,
+                    'html'
+                );
+
+                //Send internal notification
+                InboxMessage::create([
+                    'sent_to' => $approver->id,
+                    'subject' => $inbox_title,
+                    'message' => $inbox_message,
+                    'message_category' => $inbox_message_category,
+                    'sent_from' => $inbox_sent_from,
+                    'priority_status' => $inbox_priority_status,
+                    'is_read' => false
+                ]);
+            }
+        } else {
+            \Log::warning('No approval users found for Purchase Order: ' . $purchaseOrder->poNo);
+        }
+        
+      
+ 
+       
+        
+        
+        // Step 3 - Prepare JSON data for change tracking
         
         $changeData = [
-            'controller' => 'PurchaseOrderController',
-            'title' => 'PO#'.$purchaseOrder->poNo." Approval Request by ".$userName,
+            'changeable_type' => 'App\Models\PurchaseOrder',
+            'featureId' => $featureId,
+            'title' => 'PO#'.$purchaseOrder->poNo." Approval Request by ".$userName,   
+            'notes' => 'PO#'.$purchaseOrder->poNo." Approval Request by ".$userName,
+            'category'=>'Purchase Order',
             'table' => 'purchase_orders',
             'idField' => 'poID',
-            'id' => $purchaseOrder->poID,
+            'changeable_id' => $purchaseOrder->poID,
             'user_id' => $userId,
-            'changes' => [
+            'created_by'=>$userId,
+            'changes' => json_encode([
                 [
                     'label' => 'Status',
                     'field' => 'poStatus',
                     'before' => 'Draft',
                     'after' => 'Request Approval'
                 ]
-            ]
+            ])
         ];
 
         if ($this->debug) {
             \Log::info('Change data prepared', $changeData);
         }
-        dd($changeData);
+       
          // Step 3 - Store Change Tracking
          $requestChangeController = new RequestChangeController();
-         $requestChangeController->store(new Request($changeData));
+         $requestChangeController->storeDB(new Request($changeData));
          if ($this->debug) {
              \Log::info('Change tracking stored successfully');
          }
@@ -357,6 +425,67 @@ class PurchaseOrderController extends Controller
         return redirect()
             ->route('purchase-orders.index', ['po' => $purchaseOrder->poNo, 'status' => $purchaseOrder->poStatus, 'valid' => 1])
             ->with('success', 'Purchase Order status updated successfully');
+    }
+
+    public function approve(PurchaseOrder $po)
+    {
+        $userId = auth()->id();
+        $userName = auth()->user()->name;
+        $featureId = FeatureAccess::getFeatureID('Purchase Order');
+        
+        // Check if user has approval permission
+        if (!FeatureAccess::canApproveById($userId, $featureId)) {
+            if ($this->debug) {
+                \Log::warning('User lacks approval permission', ['user_id' => $userId]);
+            }
+            abort(403, 'Unauthorized action');
+        }
+
+        // Validate current status
+        if ($po->poStatus !== 'Request Approval') {
+            if ($this->debug) {
+                \Log::warning('Invalid PO status for approval', 
+                    ['current_status' => $po->poStatus, 'expected_status' => 'Request Approval']);
+            }
+            return back()->with('error', 'Invalid Purchase Order status for approval');
+        }
+
+        // Prepare change tracking data
+        $changeData = [
+            'controller' => 'PurchaseOrderController',
+            'title' => 'PO#'.$po->poNo." Approved by ".$userName,
+            'table' => 'purchase_orders',
+            'idField' => 'poID',
+            'id' => $po->poID,
+            'user_id' => $userId,
+            'changes' => [
+                [
+                    'label' => 'Status',
+                    'field' => 'poStatus',
+                    'before' => 'Request Approval',
+                    'after' => 'Approved'
+                ]
+            ]
+        ];
+
+        // Store change tracking
+        $requestChangeController = new RequestChangeController();
+        $requestChangeController->store(new Request($changeData));
+
+        // Update PO status
+        $po->update([
+            'poStatus' => 'Approved',
+            'approved_by' => $userId,
+            'approved_at' => now()
+        ]);
+
+        if ($this->debug) {
+            \Log::info('Purchase Order approved successfully', ['po_no' => $po->poNo]);
+        }
+
+        return redirect()
+            ->route('purchase-orders.index', ['po' => $po->poNo, 'status' => $po->poStatus, 'valid' => 1])
+            ->with('success', 'Purchase Order has been approved successfully');
     }
 
     public function destroy(PurchaseOrder $purchaseOrder)

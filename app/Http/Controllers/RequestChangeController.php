@@ -6,6 +6,7 @@ use App\Models\RequestChange;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\FeatureAccess;
 
 class RequestChangeController extends Controller
 {
@@ -31,38 +32,52 @@ class RequestChangeController extends Controller
         return view('request-changes.create');
     }
 
-    public function store(Request $request)
+    public function storeDB(Request $request)
     {
+       $userID=$request->user_id; 
+       $featureId = $request->input('featureId');
+        // Validate the request chang
         $validated = $request->validate([
-            'changeable_type' => 'required|string',
+           'changeable_type' => 'required|string|in:App\Models\PurchaseOrder,App\Models\User,App\Models\Client',
             'changeable_id' => 'required|integer',
             'notes' => 'required|string|max:500',
-            'changes' => 'required|json',
-            'data' => 'required|json'
+            'changes' => 'required|json'
+        ], [
+            'changeable_type.required' => 'Please select what you want to change',
+            'changeable_id.required' => 'Invalid reference ID',
+            'notes.required' => 'Please provide a reason for the change',
+            'notes.max' => 'Reason must be less than 500 characters',
+            'changes.required' => 'Please specify the changes',
+            'changes.json' => 'Invalid changes format'
         ]);
 
-        if (!FeatureAccess::canCreate('request_changes')) {
+     
+        // Check if user has permission to create request changes
+        if (!FeatureAccess::canCreateById($userID,$featureId)) {
             abort(403, 'Unauthorized action.');
         }
-
+       
         // Validate if referenced model exists
         $model = $validated['changeable_type']::find($validated['changeable_id']);
+       
         if (!$model) {
             return back()->withInput()->with('error', 'The referenced record does not exist.');
         }
 
+       
         try {
             $requestChange = RequestChange::create([
                 ...$validated,
                 'status' => 'pending',
                 'created_by' => Auth::id(),
-                'data' => json_decode($validated['data'], true)
+                'data' =>($validated['changes']
             ]);
 
-            return redirect()->route('request-changes.index')
-                ->with('success', 'Request change submitted successfully.');
+            return redirect()->route('purchase-orders.index')
+                ->with('success', 'Change request submitted successfully!');
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Failed to submit request: ' . $e->getMessage());
+            return redirect()->route('purchase-orders.index')
+                ->with('error', 'Failed to submit change request: ' . $e->getMessage());
         }
     }
 
