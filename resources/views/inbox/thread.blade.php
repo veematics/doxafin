@@ -89,7 +89,7 @@
                                             </div>
                                             <div class="card-body">
                                                 <div class="mb-3">
-                                                    <p>{!! nl2br(e($msg->message)) !!}</p>
+                                                    <p>{!! nl2br($msg->message) !!}</p>
                                                 </div>
                                                 <div class="d-flex">
                                                     @if($msg->priority_status == 3)
@@ -110,6 +110,7 @@
                             </div>
 
                             <!-- Reply form -->
+                            @if($messages->first()->sent_from !== 1)
                             <div class="mt-5">
                                 <h5 class="mb-3">Reply to this thread</h5>
                                 <form action="{{ route('inbox.reply', $messages->first()) }}" method="POST">
@@ -129,6 +130,7 @@
                                     </div>
                                 </form>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -297,6 +297,8 @@ class PurchaseOrderController extends Controller
         $userId = auth()->id();
         $userName = auth()->user()->name;
         $featureId = FeatureAccess::getFeatureID('Purchase Order');
+        $clientName = $purchaseOrder->client->company_name;
+        $rcCategory="Purchase Order";
         
         $canedit=FeatureAccess::canEditById($userId, $featureId);
       
@@ -324,7 +326,7 @@ class PurchaseOrderController extends Controller
 
 
         $inbox_title = "PO#".$purchaseOrder->poNo." Approval Request by ".$userName;
-        $inbox_message= "Click <a href='".$approvalUrl."'>here</a> to view the PO#".$purchaseOrder->poNo." Approval Request by ".$userName;
+        $inbox_message= "Client: ".$clientName."\nClick <a href='".$approvalUrl."'>here</a> to view the PO#".$purchaseOrder->poNo." Approval Request by ".$userName;
         $inbox_message_category= "system";
         $inbox_sent_from=1; // 1=system, 1=user
         $inbox_priority_status=3;
@@ -383,11 +385,13 @@ class PurchaseOrderController extends Controller
             'changeable_type' => 'App\Models\PurchaseOrder',
             'featureId' => $featureId,
             'title' => 'PO#'.$purchaseOrder->poNo." Approval Request by ".$userName,   
-            'notes' => 'PO#'.$purchaseOrder->poNo." Approval Request by ".$userName,
-            'category'=>'Purchase Order',
+            'notes' => $inbox_message,
+            'category'=>$rcCategory,
             'table' => 'purchase_orders',
+            'client_id' => $purchaseOrder->poClient,         
             'idField' => 'poID',
             'changeable_id' => $purchaseOrder->poID,
+            'changeable_code' => $purchaseOrder->poNo,
             'user_id' => $userId,
             'created_by'=>$userId,
             'changes' => json_encode([
@@ -411,7 +415,7 @@ class PurchaseOrderController extends Controller
              \Log::info('Change tracking stored successfully');
          }
 
-         dd('Tracking done successfully');
+         
          // Step 4- Store New Status
         $purchaseOrder->update([
             'poStatus' => 'Request Approval',

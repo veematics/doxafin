@@ -6,31 +6,53 @@ use App\Models\RequestChange;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Helpers\FeatureAccess;
 
 class RequestChangeController extends Controller
 {
+    protected $debug = 1; // Set to 1 to enable logging, 0 to disable
+
+    protected function log($message, $context = [])
+    {
+        if ($this->debug) {
+            \Log::info($message, $context);
+        }
+    }
+
     public function index()
     {
-        $requestChanges = RequestChange::with(['creator', 'approver', 'changeable'])
+        $activeRC = DB::table('request_changes')
+            ->leftJoin('users as creator', 'request_changes.created_by', '=', 'creator.id')
+            ->leftJoin('users as approver', 'request_changes.approved_by', '=', 'approver.id')
+            ->select('request_changes.*', 'creator.name as creator_name', 'approver.name as approver_name', 'request_changes.created_at')
             ->where('is_archived', false)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->orderBy('request_changes.updated_at', 'desc')
+            ->get()
+            ->groupBy('category');
 
-        $archivedChanges = RequestChange::with(['creator', 'approver', 'changeable', 'client'])
+        $archivedRC = DB::table('request_changes')
+            ->leftJoin('users as creator', 'request_changes.created_by', '=', 'creator.id')
+            ->leftJoin('users as approver', 'request_changes.approved_by', '=', 'approver.id')
+            ->select('request_changes.*', 'creator.name as creator_name', 'approver.name as approver_name', 'request_changes.created_at')
             ->where('is_archived', true)
-            ->orderBy('archived_at', 'desc')
+            ->orderBy('request_changes.archived_at', 'desc')
             ->paginate(10);
 
         $clients = \App\Models\Client::orderBy('company_name')->get();
 
-        return view('request-changes.index', compact('requestChanges', 'archivedChanges', 'clients'));
+        return view('request-changes.index', compact('activeRC', 'archivedRC', 'clients'));
     }
 
-    public function create()
-    {
-        return view('request-changes.create');
-    }
+    // public function create()
+    // {
+    //     $purchaseOrders = \App\Models\PurchaseOrder::orderBy('created_at', 'desc')->get();
+    //     $users = \App\Models\User::orderBy('name')->get();
+    //     $clients = \App\Models\Client::orderBy('company_name')->get();
+    //     $statuses = RequestChange::statuses();
+        
+    //     return view('request-changes.create', compact('purchaseOrders', 'users', 'clients', 'statuses'));
+    // }
 
     public function storeDB(Request $request)
     {
@@ -41,14 +63,16 @@ class RequestChangeController extends Controller
            'changeable_type' => 'required|string|in:App\Models\PurchaseOrder,App\Models\User,App\Models\Client',
             'changeable_id' => 'required|integer',
             'notes' => 'required|string|max:500',
-            'changes' => 'required|json'
+            'changes' => 'required|json',
+            'client_id' => 'sometimes|nullable|integer|exists:clients,id'
         ], [
             'changeable_type.required' => 'Please select what you want to change',
             'changeable_id.required' => 'Invalid reference ID',
             'notes.required' => 'Please provide a reason for the change',
             'notes.max' => 'Reason must be less than 500 characters',
             'changes.required' => 'Please specify the changes',
-            'changes.json' => 'Invalid changes format'
+            'changes.json' => 'Invalid changes format',
+            'client_id.exists' => 'The selected client does not exist'
         ]);
 
      
@@ -63,18 +87,49 @@ class RequestChangeController extends Controller
         if (!$model) {
             return back()->withInput()->with('error', 'The referenced record does not exist.');
         }
-
-       
+        
+        //get Client's Name
+        $client = \App\Models\Client::find($validated['client_id']);
+        if (!$client) {
+            return back()->withInput()->with('error', 'The referenced client does not exist.');
+        }
+        $clientController = new \App\Http\Controllers\ClientController();
+        $clientData = $clientController->getClientDetails($client)->getData();
+      
+        // Prepare data for insertion
+        
         try {
-            $requestChange = RequestChange::create([
+            $insertData = [
                 ...$validated,
+                'title' => $request->input('title'),
+                'category' => $request->input('category'),
+                'client_id' => $validated['client_id'] ?? null,
+                'client_name' => $clientData->company_name,
+                'changeable_code'=>$request->input('changeable_code'),
                 'status' => 'pending',
                 'created_by' => Auth::id(),
-                'data' =>($validated['changes']
-            ]);
-
-            return redirect()->route('purchase-orders.index')
-                ->with('success', 'Change request submitted successfully!');
+                'changes' => $validated['changes'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+            
+            $this->log('Attempting to insert request change with data:', ['data' => $insertData]);
+            
+            try {
+                $success = DB::table('request_changes')->insert($insertData);
+                $this->log('Insert operation result:', ['success' => $success]);
+                
+                if (!$success) {
+                    $this->log('Failed to insert request change', ['error' => true]);
+                    throw new \Exception('Failed to insert request change');
+                }
+                
+                $this->log('Request change inserted successfully');
+            } catch (\Exception $insertError) {
+                $this->log('Exception during insert operation:', ['error' => $insertError->getMessage(), 'error_type' => 'exception']);
+                throw $insertError;
+            }
+            return true;
         } catch (\Exception $e) {
             return redirect()->route('purchase-orders.index')
                 ->with('error', 'Failed to submit change request: ' . $e->getMessage());

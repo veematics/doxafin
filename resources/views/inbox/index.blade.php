@@ -239,7 +239,7 @@
                                                             </small>
                                                         @endif
                                                     </div>
-                                                    <small class="text-muted">{{ Str::limit($message->message, 50) }}</small>
+                                                    <small class="text-muted">{{ Str::limit($message->message, 150) }}</small>
                                                 </div>
                                             </td>
                                             <td class="text-end pe-3">
@@ -328,7 +328,9 @@
                             <select class="form-select select2-recipient" name="sent_to" id="recipient" required>
                                
                                 @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @if($user->id != 1)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -496,10 +498,9 @@
                 
                 // Set modal content
                 document.getElementById('modalMessageSubject').textContent = subject;
-                document.getElementById('modalMessageContent').innerHTML = 
-                    content
-                        .replace(/\n/g, '<br>')
-                        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+                
+
+                document.getElementById('modalMessageContent').innerHTML = content;
                 document.getElementById('modalMessageSender').textContent = 'From: ' + sender;
                 document.getElementById('modalMessageDate').textContent = date;
                 

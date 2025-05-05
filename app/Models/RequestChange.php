@@ -15,7 +15,6 @@ class RequestChange extends Model
         'changeable_id',
         'category',
         'notes',
-        'data',
         'status',
         'changes',
         'created_by',
@@ -23,7 +22,7 @@ class RequestChange extends Model
         'approved_at',
         'is_archived',
         'archived_at',
-        'original_status'
+        'client_id'
     ];
 
     protected $casts = [
@@ -46,6 +45,11 @@ class RequestChange extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public static function statuses(): array

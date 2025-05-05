@@ -79,121 +79,89 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <!-- Purchase Order Card -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <h4 class="card-title mb-0">Purchase Order</h4>
-                                        </div>
-                                        <div class="card-body">
+                                @php
+                                    $groupedChanges = $activeRC->groupBy('category');
+                                    $changes=$groupedChanges[null];
+                                    $currentCategoryRC = null;
+                            
+                                        
+                                @endphp
 
-                                            <div class="text-medium-emphasis">Recent Changes</div>
-                                            @php
-                                                $poChanges = $requestChanges->where('changeable_type', 'like', '%PurchaseOrder%')->take(5);
-                                            @endphp
-                                            <div class="changes-content" data-module="po">
-                                                @forelse($poChanges as $change)
-                                                    <div class="border-bottom py-2" data-client-id="{{ $change->client_id }}">
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>{{ Str::limit($change->notes, 30) }}</div>
-                                                            <span class="badge badge-{{ $change->status }}">{{ ucfirst($change->status) }}</span>
-                                                        </div>
-                                                        <small class="text-medium-emphasis">{{ $change->created_at->format('d-m-Y') }}</small>
-                                                    </div>
-                                                @empty
-                                                    <div class="text-center py-3">No changes found</div>
-                                                @endforelse
+                                @foreach($changes as $items => $item)
+                                    @php
+                                 
+                      
+                                if($currentCategoryRC!=$item[0]->category ){
+                                    if($currentCategoryRC!=null){
+                                        echo '</tbody>
+                                        </table>
+                                    </div></div>
+                                        </div>
+                                        </div>';
+                                    };
+                                    $currentCategoryRC=$item[0]->category;
+                                    $isChangeCategory=true;
+                                }else{
+                                    $isChangeCategory=false;
+                                }
+
+                                    @endphp
+                                    @if ( $isChangeCategory=true)
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h4 class="card-title mb-0">{{ $currentCategoryRC }}</h4>
                                             </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table border mb-0">
+                                                        <thead class="table-light fw-semibold">
+                                                            <tr class="align-middle">
+                                                                <th>Title</th>
+                                                                <th>Status</th>
+                                                                <th>Created At</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                    @endif
+                                
+                                                @foreach($item as $data)
+                                               
+                                                    <tr class="align-middle">
+                                                        <td class="small">{{ $data->title }}<br/>C: <a href="{{ route('clients.show', $data->client_id) }}" target="_blank">{{ $data->client_name }}</a></td>
+                                                        <td>
+                                                            <span class="badge rounded-pill bg-{{ 
+                                                            $data->status === 'approved' ? 'success' : 
+                                                            ($data->status === 'pending' ? 'warning' : 
+                                                            ($data->status === 'rejected' ? 'danger' : 'orange')) 
+                                                        }}">
+                                                            {{ ucfirst($data->status) }}
+                                                        </span>
+                                                        </td>
+                                                        <td class="small">{{ \Carbon\Carbon::parse($data->created_at)->format('d F Y H:i') }}</td>
+                                                        <td>
+                                                            <div class="d-flex flex-column gap-1">
+    <a href="#" class="btn btn-sm btn-info" style="font-size: 0.8rem;">View History</a>
+    @if($can_edit)
+        <a href="#" class="btn btn-sm btn-primary" style="font-size: 0.8rem;">Respond</a>
+        <form action="#" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-secondary" style="font-size: 0.8rem;">Archive RC</button>
+        </form>
+    @endif
+</div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                                         </div>
+                                     </div>
                                     </div>
-                                </div>
-
-                                <!-- Invoice Card -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <h4 class="card-title mb-0">Invoice</h4>
-                                        </div>
-                                        <div class="card-body">
-
-                                            <div class="text-medium-emphasis">Recent Changes</div>
-                                            @php
-                                                $invoiceChanges = $requestChanges->where('changeable_type', 'like', '%Invoice%')->take(5);
-                                            @endphp
-                                            <div class="changes-content" data-module="invoice">
-                                                @forelse($invoiceChanges as $change)
-                                                    <div class="border-bottom py-2" data-client-id="{{ $change->client_id }}">
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>{{ Str::limit($change->notes, 30) }}</div>
-                                                            <span class="badge badge-{{ $change->status }}">{{ ucfirst($change->status) }}</span>
-                                                        </div>
-                                                        <small class="text-medium-emphasis">{{ $change->created_at->format('d-m-Y') }}</small>
-                                                    </div>
-                                                @empty
-                                                    <div class="text-center py-3">No changes found</div>
-                                                @endforelse
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Payment Card -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <h4 class="card-title mb-0">Payment</h4>
-                                        </div>
-                                        <div class="card-body">
-
-                                            <div class="text-medium-emphasis">Recent Changes</div>
-                                            @php
-                                                $paymentChanges = $requestChanges->where('changeable_type', 'like', '%Payment%')->take(5);
-                                            @endphp
-                                            <div class="changes-content" data-module="payment">
-                                                @forelse($paymentChanges as $change)
-                                                    <div class="border-bottom py-2" data-client-id="{{ $change->client_id }}">
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>{{ Str::limit($change->notes, 30) }}</div>
-                                                            <span class="badge badge-{{ $change->status }}">{{ ucfirst($change->status) }}</span>
-                                                        </div>
-                                                        <small class="text-medium-emphasis">{{ $change->created_at->format('d-m-Y') }}</small>
-                                                    </div>
-                                                @empty
-                                                    <div class="text-center py-3">No changes found</div>
-                                                @endforelse
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Services Card -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <h4 class="card-title mb-0">Services</h4>
-                                        </div>
-                                        <div class="card-body">
-
-                                            <div class="text-medium-emphasis">Recent Changes</div>
-                                            @php
-                                                $serviceChanges = $requestChanges->where('changeable_type', 'like', '%Service%')->take(5);
-                                            @endphp
-                                            <div class="changes-content" data-module="service">
-                                                @forelse($serviceChanges as $change)
-                                                    <div class="border-bottom py-2" data-client-id="{{ $change->client_id }}">
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>{{ Str::limit($change->notes, 30) }}</div>
-                                                            <span class="badge badge-{{ $change->status }}">{{ ucfirst($change->status) }}</span>
-                                                        </div>
-                                                        <small class="text-medium-emphasis">{{ $change->created_at->format('d-m-Y') }}</small>
-                                                    </div>
-                                                @empty
-                                                    <div class="text-center py-3">No changes found</div>
-                                                @endforelse
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -232,48 +200,13 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($requestChanges as $change)
-                                            <tr class="align-middle">
-                                                <td>{{ $change->category }}</td>
-                                                <td>
-                                                    <span class="badge badge-{{ $change->status }}">
-                                                        {{ ucfirst($change->status) }}
-                                                    </span>
-                                                </td>
-                                                <td>{{ $change->client->name ?? 'N/A' }}</td>
-                                                <td>{{ $change->created_at->format('d-m-Y H:i') }}</td>
-                                                <td>{{ $change->creator->name }}</td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        <a href="{{ route('request-changes.show', $change) }}" 
-                                                           class="btn btn-sm btn-info">View</a>
-                                                        
-                                                        @if($change->status === 'pending' && $can_approve)
-                                                            <form action="{{ route('request-changes.approve', $change) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
-                                                            </form>
-                                                            <form action="{{ route('request-changes.reject', $change) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center py-4">
-                                                    No request changes found
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                      
                                     </tbody>
                                 </table>
                             </div>
 
                             <div class="mt-4">
-                                {{ $requestChanges->links() }}
+                                
                             </div>
                         </div>
 
@@ -308,7 +241,7 @@
                                                 <td>{{ $change->category }}</td>
                                                 <td>{{ $change->client->name ?? 'N/A' }}</td>
                                                 <td>{{ Str::limit($change->notes, 50) }}</td>
-                                                <td>{{ $change->archived_at->format('d-m-Y H:i') }}</td>
+                                                <td>{{ $change->archived_at->format('d F Y H:i') }}</td>
                                                 <td>
                                                     <span class="badge badge-{{ $change->original_status }}">
                                                         {{ ucfirst($change->original_status) }}
