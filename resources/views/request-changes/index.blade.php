@@ -142,7 +142,7 @@
                                                         <td class="small">{{ \Carbon\Carbon::parse($data->created_at)->format('d F Y H:i') }}</td>
                                                         <td>
                                                             <div class="d-flex flex-column gap-1">
-    <a href="#" class="btn btn-sm btn-info" style="font-size: 0.8rem;">View History</a>
+    <a href="#" class="btn btn-sm btn-info" style="font-size: 0.8rem;" data-coreui-toggle="modal" data-coreui-target="#historyModal" data-log='@json($data->log)'>View History</a>
     @if($can_edit)
         <a href="#" class="btn btn-sm btn-primary" style="font-size: 0.8rem;">Respond</a>
         <form action="#" method="POST">
@@ -286,5 +286,176 @@
     </div>
 @push('scripts')
     <script src="{{ asset('js/request-changes/module-filters.js') }}"></script>
+@endpush
+
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Request Change History</h5>
+                <button class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- History data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-coreui-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const historyModal = document.getElementById('historyModal');
+        if (historyModal) {
+            historyModal.addEventListener('show.coreui.modal', function(event) {
+               
+                const button = event.relatedTarget;
+                const logString = button.dataset.log;
+                
+                const tableBody = document.getElementById('historyTableBody');
+                tableBody.innerHTML = '';
+                console.log("Raw log data:", logString);
+              
+                // Handle empty data case first
+                if (!logString || logString === 'null') {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No history data available</td></tr>';
+                    return;
+                }
+                
+                // Try to parse the log data
+                let logData = parseLogData(logString);
+                alert(logData);
+              
+                // Handle parsing failures
+                if (!logData) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error parsing history data</td></tr>';
+                    return;
+                }
+                
+                // Convert to array if it's not already
+                const logs = Array.isArray(logData) ? logData : [logData];
+                
+                // Handle empty array
+                if (logs.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No history data available</td></tr>';
+                    return;
+                }
+                
+                // Render each log entry
+                logs.forEach(renderLogEntry);
+                
+                // If we get here with no entries rendered, show empty message
+                if (tableBody.children.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No valid history entries found</td></tr>';
+                }
+            });
+        }
+        
+        // Helper function to parse log data with multiple strategies
+        function parseLogData(logString) {
+            // Strategy 1: Direct JSON parsing
+            try {
+                return JSON.parse(logString);
+            } catch (error) {
+                console.log("Direct parsing failed:", error.message);
+            }
+            
+            // Strategy 2: Handle quoted JSON
+            try {
+                const trimmed = logString.trim();
+                if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                    const unquoted = trimmed.slice(1, -1).replace(/\\"/g, '"');
+                    return JSON.parse(unquoted);
+                }
+            } catch (error) {
+                console.log("Quoted string parsing failed:", error.message);
+            }
+            
+            // Strategy 3: Double-encoded JSON
+            try {
+                return JSON.parse(JSON.parse(logString));
+            } catch (error) {
+                console.log("Double-encoded parsing failed:", error.message);
+            }
+            
+            // If all parsing strategies fail
+            console.error("All parsing strategies failed for logString:", logString);
+            return null;
+        }
+        
+        // Helper function to render a single log entry
+        function renderLogEntry(log) {
+            if (!log || typeof log !== 'object') return;
+            
+            const tableBody = document.getElementById('historyTableBody');
+            
+            // Format date safely
+            let formattedDate = formatDate(log.createDate);
+            
+            // Handle HTML content safely
+            const notesContainer = document.createElement('div');
+            notesContainer.innerHTML = log.Notes || 'No notes';
+            
+            tableBody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td><span class="badge bg-${getStatusColor(log.status)}">${log.status || 'unknown'}</span></td>
+                    <td>${formattedDate}</td>
+                    <td>${log.createByName || 'Unknown'}</td>
+                    <td>${notesContainer.innerHTML}</td>
+                </tr>
+            `);
+        }
+        
+        // Helper function to format dates with fallback
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            try {
+                const date = new Date(dateString);
+                if (!isNaN(date.getTime())) {
+                    return date.toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            } catch (e) {
+                console.log("Date formatting error:", e.message);
+            }
+            
+            return dateString;
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'approved': return 'success';
+                case 'pending': return 'warning';
+                case 'rejected': return 'danger';
+                case 'request-revision': return 'info';
+                default: return 'primary';
+            }
+        }
+    });
+</script>
 @endpush
 </x-app-layout>

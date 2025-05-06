@@ -110,11 +110,20 @@ class RequestChangeController extends Controller
                 'created_by' => Auth::id(),
                 'changes' => $validated['changes'],
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+                'log' => json_encode([
+                    [
+                        'status' => 'pending',
+                        'createDate' => now(),
+                        'createBy' => Auth::id(),
+                        'createByName' => Auth::user()->name,
+                        'Notes' => $validated['notes']
+                    ]
+                ])
             ];
-            
+          
             $this->log('Attempting to insert request change with data:', ['data' => $insertData]);
-            
+
             try {
                 $success = DB::table('request_changes')->insert($insertData);
                 $this->log('Insert operation result:', ['success' => $success]);

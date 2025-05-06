@@ -22,7 +22,8 @@ class RequestChange extends Model
         'approved_at',
         'is_archived',
         'archived_at',
-        'client_id'
+        'client_id',
+        'log'
     ];
 
     protected $casts = [

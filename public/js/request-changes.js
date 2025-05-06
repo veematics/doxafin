@@ -37,4 +37,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     globalStatusFilter.addEventListener('change', filterChanges);
     globalClientFilter.addEventListener('change', filterChanges);
-}));
+});
