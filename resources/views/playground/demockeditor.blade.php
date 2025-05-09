@@ -1,9 +1,9 @@
 <x-app-layout>
-    @php
-    if (session('role_name') !== 'SA') {
-          abort(403, 'Playground access is forbidden for you. Your action logged for security assestment');
+@php
+      if (!str_contains(session('role_name'), 'SA')) {
+         abort(403, 'Playground access is forbidden for you. Your action logged for security assestment');
       }
- @endphp
+   @endphp
 
     <a href="{{ route('playground.index') }}" class="btn btn-primary mb-4"><< Back to Index</a>
     

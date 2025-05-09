@@ -15,11 +15,7 @@ export default defineConfig(({ command, mode }) => {
                     'resources/css/custom.css',
                     'resources/js/app.js',
                     'resources/js/nonapp.js',
-                    'resources/js/inboxselect2.js',
-                    'resources/css/select2.css',
-                    'resources/js/ckeditor-init.js',
-                    'resources/js/select2.js',
-                    'resources/js/jquery.js',
+                    'resources/js/inboxselect2.js'
                 ],
                 refresh: true,
             }),
@@ -32,10 +28,26 @@ export default defineConfig(({ command, mode }) => {
                 protocol: 'http'
             },
             watch: {
-                usePolling: true,
+                usePolling: false,  // Changed to false for better performance
             },
             cors: true,
             origin: `http://${host}:5173`,
+            fs: {
+                strict: false
+            }
         },
+
+        optimizeDeps: {
+            include: ['jquery'],
+            force: true
+        },
+
+        build: {
+            commonjsOptions: {
+                include: [/node_modules/]
+            },
+            cache: true,
+            sourcemap: false
+        }
     };
 });

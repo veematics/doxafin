@@ -1,9 +1,9 @@
 <x-app-layout>
-    @php
-       if (session('role_name') !== 'SA') {
-             abort(403, 'Playground access is forbidden for you. Your action logged for security assestment');
-         }
-    @endphp
+@php
+      if (!str_contains(session('role_name'), 'SA')) {
+         abort(403, 'Playground access is forbidden for you. Your action logged for security assestment');
+      }
+   @endphp
 <div class="container-lg">
     @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">

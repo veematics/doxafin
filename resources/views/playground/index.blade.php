@@ -1,15 +1,16 @@
 <x-app-layout>
-   @php
-      if (session('role_name') !== 'SA') {
-            abort(403, 'Playground access is forbidden for you. Your action logged for security assestment');
-        }
+@php
+      if (!str_contains(session('role_name'), 'SA')) {
+         abort(403, 'Playground access is forbidden for you. Your action logged for security assestment');
+      }
    @endphp
    Debug Test: <br/>
    <a href="{{ route('playground.roles') }}">Cek roles and Permission</a><br/>
    <a href="{{ route('playground.memberroles') }}">Cek other roles and Permission</a><br/>
    <a href="{{ route('playground.select2') }}">Select2 Library</a><br/>
    <a href="{{ route('playground.ckeditor') }}">Ckeditor Test</a><br/>
-   <a href="{{ route('playground.email') }}">Email Test</a>
+   <a href="{{ route('playground.email') }}">Email Test</a><br/>
+   <a href="{{ route('playground.gdrive.index') }}">Gdrive Test</a>
 
    <div class="mt-4">
       <h3 class="font-semibold text-lg">Session Data:</h3>

@@ -16,17 +16,21 @@ if($debugPermission==1){
         $userId = auth()->id();
         $cacheKey = 'user_permissions_' . $userId;
         $permissions = Cache::get($cacheKey);
-        $can_view = $permissions[$featureId][0]->can_view;
-        $can_create = $permissions[$featureId][0]->can_create;
-        $can_approve = $permissions[$featureId][0]->can_approve;
-        $can_edit = $permissions[$featureId][0]->can_edit;
-        $can_delete = $permissions[$featureId][0]->can_delete;
-        echo("<h5>Permissions for FeatureID:".$featureId."</h5>");
-        echo('can_view: '.$can_view.'<br/>');   
-        echo('can_create: '.$can_create.'<br/>');
-        echo('can_approve: '.$can_approve.'<br/>');
-        echo('can_edit: '.$can_edit.'<br/>');
-        echo('can_delete: '.$can_delete.'<br/>');
+        if(isset($permissions[$featureId]) && !empty($permissions[$featureId])) {
+            $can_view = $permissions[$featureId][0]->can_view ?? false;
+            $can_create = $permissions[$featureId][0]->can_create ?? false;
+            $can_approve = $permissions[$featureId][0]->can_approve ?? false;
+            $can_edit = $permissions[$featureId][0]->can_edit ?? false;
+            $can_delete = $permissions[$featureId][0]->can_delete ?? false;
+            echo("<h5>Permissions for FeatureID:".$featureId."</h5>");
+            echo('can_view: '.$can_view.'<br/>');   
+            echo('can_create: '.$can_create.'<br/>');
+            echo('can_approve: '.$can_approve.'<br/>');
+            echo('can_edit: '.$can_edit.'<br/>');
+            echo('can_delete: '.$can_delete.'<br/>');
+        } else {
+            echo("<h5>No permissions found for FeatureID:".$featureId."</h5>");
+        }
 }
     @endphp
 

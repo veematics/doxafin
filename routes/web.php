@@ -6,7 +6,8 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\AppFeatureController;
 use App\Http\Controllers\AppSetupController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\RequestChangeController;  // Add this line
+use App\Http\Controllers\RequestChangeController;
+use App\Http\Controllers\Playground\GDriveController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\InboxMessageController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CsvDataController;
 use App\Http\Controllers\PurchaseOrderController;
+
 
 Route::get('/', [WelcomeController::class, 'index'])
     ->middleware('guest')
@@ -110,6 +112,15 @@ Route::get('/dashboard', function () {
         Route::get('/memberroles', function () {
             return view('playground.demockeditor');
         })->name('memberroles');
+       
+        Route::prefix('gdrive')->name('gdrive.')->group(function () {
+            Route::get('/', [GDriveController::class, 'gdrive'])->name('index');
+            Route::post('/upload', [GDriveController::class, 'upload'])->name('upload');
+            Route::get('/download/{fileId}', [GDriveController::class, 'download'])->name('download');
+            Route::delete('/delete/{encodedPath}', [GDriveController::class, 'destroy'])
+                ->name('playground.gdrive.delete');
+        });
+
         
     });
 
