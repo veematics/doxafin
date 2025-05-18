@@ -15,9 +15,9 @@
                             @endphp
 
                             @if($isImage)
-                                <img src="{{ route('media.download', $filePath) }}" alt="File Preview" class="img-fluid">
+                                <img src="{{ route('media.show', $filePath) }}" alt="File Preview" class="img-fluid">
                             @elseif($isPdf)
-                                <iframe src="{{ route('media.download', $filePath) }}" width="100%" height="600px" class="border-0"></iframe>
+                                <iframe src="{{ route('media.show', $filePath) }}" width="100%" height="600px" class="border-0"></iframe>
                             @else
                                 <div class="d-flex align-items-center justify-content-center h-100">
                                     <div class="text-center">

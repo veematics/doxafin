@@ -142,11 +142,18 @@
             const items = [];
             container.querySelectorAll(':scope > .menu-item').forEach((el, index) => {
                 const titleEl = el.querySelector('.menu-item-title');
+                if (!titleEl) {
+                    console.error('Missing title element in menu item:', el);
+                    return null;
+                }
+                
+                const iconEl = titleEl.querySelector('i');
+                const editBtn = el.querySelector('.edit-menu-item');
                 const item = {
                     id: el.dataset.id,
                     order: index,
                     title: titleEl.textContent.trim(),
-                    icon: titleEl.querySelector('i').className,
+                    icon: editBtn ? editBtn.dataset.icon : (el.dataset.icon || (iconEl ? iconEl.className : 'cil-circle')),
                     item_type: el.dataset.type || 'free_form',
                     app_feature_id: el.dataset.featureId || null,
                     path: el.dataset.path || null,
@@ -167,13 +174,21 @@
         function saveMenuStructure() {
             const structure = buildMenuStructure(document.getElementById('menuStructure'));
             
+            // Filter out any null items that might have been returned due to invalid menu items
+            const validStructure = structure.filter(item => item !== null);
+            
+            if (validStructure.length === 0) {
+                window.toast.show('No valid menu items to save', 'error');
+                return;
+            }
+            
             fetch(`{{ route('appsetting.menu.structure', $menu) }}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ structure: structure })
+                body: JSON.stringify({ structure: validStructure })
             })
             .then(response => response.json())
             .then(data => {
@@ -373,7 +388,15 @@
             });
 
             // Save Menu Structure Button
-            document.getElementById('saveMenuStructure').addEventListener('click', saveMenuStructure);
+            document.getElementById('saveMenuStructure').addEventListener('click', function(e) {
+                e.preventDefault();
+                try {
+                    saveMenuStructure();
+                } catch (error) {
+                    console.error('Error in saveMenuStructure:', error);
+                    window.toast.show('Error saving menu: ' + error.message, 'error');
+                }
+            });
         });
 
         // Outside DOMContentLoaded - Global event listeners

@@ -62,7 +62,18 @@
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h4>Files in Drive (Current Path: {{ $currentPath ?? '/' }})</h4>
-                {{-- Basic Folder Navigation --}}
+                <div class="d-flex gap-2">
+                    {{-- Create New Folder Button --}}
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-coreui-toggle="modal" data-coreui-target="#createFolderModal">
+                        <svg class="icon me-1" width="16" height="16"><use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-folder-open"></use></svg>
+                        New Folder
+                    </button>
+                    {{-- Bulk Delete Button (Hidden by default) --}}
+                    <button type="button" class="btn btn-sm btn-outline-danger d-none" id="bulkDeleteBtn" onclick="confirmBulkDelete()">
+                        <svg class="icon me-1" width="16" height="16"><use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-trash"></use></svg>
+                        Delete Selected
+                    </button>
+                    {{-- Basic Folder Navigation --}}
                 @if(isset($parentPathId) && $currentPathId !== $rootFolderId)
                     <a href="{{ route('playground.gdrive.index', [
                         'path_id' => $parentPathId,
@@ -88,6 +99,9 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th width="30px">
+                                <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                            </th>
                             <th>Name</th>
                             <th>Type</th>
                             <th>Size</th>
@@ -98,6 +112,9 @@
                     <tbody id="filesList">
                         @forelse($files ?? [] as $item)
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input item-checkbox" value="{{ $item->path_id }}" data-name="{{ $item->name }}" onclick="updateBulkDeleteButton()">
+                                </td>
                                 <td>
                                     @if($item->type === 'dir')
                                         <svg class="icon me-2" width="16" height="16"><use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-folder"></use></svg>
@@ -154,10 +171,37 @@
         </div>
     </div>
 
+    {{-- Create Folder Modal --}}
+    <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true" data-coreui-backdrop="static" data-coreui-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('playground.gdrive.create-folder') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="parent_folder_id" value="{{ $currentPathId ?? '' }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createFolderModalLabel">Create New Folder</h5>
+                        <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="folderName" class="form-label">Folder Name</label>
+                            <input type="text" class="form-control" id="folderName" name="folder_name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Folder</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- Hidden form for delete requests --}}
     <form id="deleteFileForm" method="POST" style="display: none;">
         @csrf
-        @method('DELETE')
+        @method('POST')
+        <input type="hidden" name="ids[]" id="deleteItems">
     </form>
 
     <script>
@@ -165,6 +209,48 @@
             if (confirm(`Are you sure you want to delete ${isDir ? 'the folder' : 'the file'} "${fileName}"?`)) {
                 const form = document.getElementById('deleteFileForm');
                 form.action = "{{ url('playground/gdrive/delete') }}/" + encodedPath;
+                document.getElementById('deleteItems').value = JSON.stringify([{id: encodedPath, name: fileName}]);
+                form.submit();
+            }
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.getElementsByClassName('item-checkbox');
+            Array.from(checkboxes).forEach(checkbox => checkbox.checked = selectAll.checked);
+            updateBulkDeleteButton();
+        }
+
+        function updateBulkDeleteButton() {
+            const checkboxes = document.getElementsByClassName('item-checkbox');
+            const selectedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            
+            if (selectedCount > 0) {
+                bulkDeleteBtn.classList.remove('d-none');
+            } else {
+                bulkDeleteBtn.classList.add('d-none');
+            }
+        }
+
+        function confirmBulkDelete() {
+            const checkboxes = document.getElementsByClassName('item-checkbox');
+            const selectedItems = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => ({
+                    id: checkbox.value,
+                    name: checkbox.dataset.name
+                }));
+
+            if (selectedItems.length === 0) return;
+
+            const itemNames = selectedItems.map(item => `"${item.name}"`).join(', ');
+            if (confirm(`Are you sure you want to delete these items: ${itemNames}?`)) {
+                const form = document.getElementById('deleteFileForm');
+                form.method = "POST";
+                form.action = "{{ route('playground.gdrive.bulk-delete') }}";
+                //console.log(JSON.stringify(selectedItems.map(item => item.id)));
+                document.getElementById('deleteItems').value = JSON.stringify(selectedItems.map(item => item.id));
                 form.submit();
             }
         }

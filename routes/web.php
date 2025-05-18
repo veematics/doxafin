@@ -7,6 +7,7 @@ use App\Http\Controllers\AppFeatureController;
 use App\Http\Controllers\AppSetupController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RequestChangeController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\Playground\GDriveController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
@@ -14,7 +15,7 @@ use App\Http\Controllers\InboxMessageController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CsvDataController;
-use App\Http\Controllers\PurchaseOrderController;
+
 
 
 Route::get('/', [WelcomeController::class, 'index'])
@@ -117,8 +118,10 @@ Route::get('/dashboard', function () {
             Route::get('/', [GDriveController::class, 'gdrive'])->name('index');
             Route::post('/upload', [GDriveController::class, 'upload'])->name('upload');
             Route::get('/download/{fileId}', [GDriveController::class, 'download'])->name('download');
-            Route::delete('/delete/{encodedPath}', [GDriveController::class, 'destroy'])
-                ->name('playground.gdrive.delete');
+            Route::post('/delete/{encodedPath}', [GDriveController::class, 'destroy'])
+                ->name('delete');
+            Route::post('/create-folder', [GDriveController::class, 'createFolder'])->name('create-folder');
+            Route::post('/bulk-delete', [GDriveController::class, 'bulkDelete'])->name('bulk-delete');
         });
 
         
@@ -227,6 +230,7 @@ Route::get('/dashboard', function () {
         Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
         Route::get('/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->name('show');
         Route::get('/{purchaseOrder}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
+        Route::get('/{purchaseOrder}/rc/{requestChange}', [PurchaseOrderController::class, 'requestChange'])->name('rc');
         Route::put('/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('update');
         Route::delete('/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
         Route::get('/{purchaseOrder}/services', [PurchaseOrderController::class, 'services'])

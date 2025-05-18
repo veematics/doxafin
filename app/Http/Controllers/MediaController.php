@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Storage;
+use App\Helpers\FeatureAccess;
+use App\Services\GoogleDriveManager;
+use Google\Service\Exception as GoogleServiceException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
-use App\Helpers\FeatureAccess;
 
 class MediaController extends Controller
 {
@@ -17,26 +18,16 @@ class MediaController extends Controller
         }
 
         try {
-            // Decode the base64 encoded path
-            $path = base64_decode($encodedPath, true);
+            // Decode the base64 encoded path (which is now the Google Drive file ID)
+            $fileId = base64_decode($encodedPath, true);
             
             // Check if base64 decode was successful
-            if ($path === false) {
-                abort(400, 'Invalid file path encoding');
+            if ($fileId === false) {
+                abort(400, 'Invalid file ID encoding');
             }
 
-            // Validate the decoded path
-            if (!preg_match('/^[\w\/\-\.]+$/', $path)) {
-                abort(400, 'Invalid file path format');
-            }
-        
-            // Verify file exists
-            if (!Storage::exists($path)) {
-                abort(404);
-            }
-            
             // For purchase order files, check if user has permission to access
-            if (strpos($path, 'purchase_orders/files') !== false) {
+            if (strpos($fileId, 'purchase_orders') !== false) {
                 // Check if user has permission to view purchase orders using FeatureAccess helper
                 $permission = FeatureAccess::check(auth()->id(), 'Purchase Orders', 'can_view');
                 if ($permission != 1) {
@@ -44,15 +35,27 @@ class MediaController extends Controller
                 }
             }
 
-            // Get file content and mime type
-            $file = Storage::get($path);
-            $type = Storage::mimeType($path);
+            // Get the Google Drive service instance
+            $googleDriveManager = app(GoogleDriveManager::class);
 
-            // Return response with proper headers
-            return new Response($file, 200, [
-                'Content-Type' => $type,
-                'Content-Disposition' => 'inline; filename="'.basename($path).'"'
-            ]);
+            try {
+                // Get file metadata to check existence and get mime type
+                $file = $googleDriveManager->getDriveService()->files->get($fileId, ['fields' => 'mimeType, name']);
+                
+                // Download file content
+                $content = $googleDriveManager->downloadFile($fileId);
+
+                // Return response with proper headers
+                return new Response($content, 200, [
+                    'Content-Type' => $file->getMimeType(),
+                    'Content-Disposition' => 'inline; filename="'.$file->getName().'"'
+                ]);
+            } catch (\Google\Service\Exception $e) {
+                if ($e->getCode() === 404) {
+                    abort(404, 'File not found');
+                }
+                throw $e;
+            }
         } catch (\Exception $e) {
             abort(500, 'Error processing file: ' . $e->getMessage());
         }

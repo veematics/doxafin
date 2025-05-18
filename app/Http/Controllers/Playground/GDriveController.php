@@ -82,6 +82,7 @@ class GDriveController extends Controller
         ]);
     }
 
+
     public function upload(Request $request)
     {
         $request->validate([
@@ -103,10 +104,46 @@ class GDriveController extends Controller
             );
 
             if ($fileId) {
-                // To redirect back, you might need the path label or just go to the targetFolderId's view
-                // This requires more thought on how you manage displaying folder names vs IDs
-                return redirect()->route('playground.gdrive.index', ['path_id' => $targetFolderId, 'path_label' => 'target_folder_name_here']) 
-                                 ->with('success', "File '{$originalName}' uploaded successfully (ID: {$fileId}).");
+                // Get the current folder name for the path label
+                $folderMeta = $this->googleDriveManager->getDriveService()->files->get($targetFolderId, ['fields' => 'name,parents']);
+                $currentPath = '/' . $folderMeta->getName();
+                
+                // If not root folder and not direct child of root, build the path without including root folder
+                if ($targetFolderId !== $this->googleDriveManager->getRootFolderId() && 
+                    isset($folderMeta->parents[0]) && 
+                    $folderMeta->parents[0] !== $this->googleDriveManager->getRootFolderId()) {
+                    $parentId = $folderMeta->getParents()[0];
+                    $parentMeta = $this->googleDriveManager->getDriveService()->files->get($parentId, ['fields' => 'name,parents']);
+                    // Only add parent name if it's not the root folder
+                    if ($parentId !== $this->googleDriveManager->getRootFolderId()) {
+                        $currentPath = '/' . $parentMeta->getName() . $currentPath;
+                    }
+                }
+                
+                // Get updated file list for the current folder
+                $filesData = [];
+                $contents = $this->googleDriveManager->listContents($targetFolderId);
+                foreach ($contents as $content) {
+                    $filesData[] = (object) [
+                        'id' => $content['id'],
+                        'name' => $content['name'],
+                        'path' => $content['id'],
+                        'path_id' => $content['id'],
+                        'type' => $content['isFolder'] ? 'dir' : 'file',
+                        'mimeType' => $content['mimeType'],
+                        'size' => !$content['isFolder'] ? $this->formatSizeUnits($content['size'] ?? 0) : '-',
+                        'modifiedTime' => $content['modifiedTime'] ? \Carbon\Carbon::parse($content['modifiedTime'])->toDateTimeString() : 'N/A'
+                    ];
+                }
+                
+                return redirect()->route('playground.gdrive.index', [
+                    'path_id' => $targetFolderId,
+                    'path_label' => $currentPath
+                ])->with([
+                    'success' => "File '{$originalName}' uploaded successfully.",
+                    'files' => $filesData
+                ]);
+
             } else {
                 throw new Exception("Upload failed, file ID not returned.");
             }
@@ -155,17 +192,56 @@ class GDriveController extends Controller
         }
     }
     
-    public function destroy($fileOrFolderId) // Renamed for clarity to ID
+    public function destroy($fileOrFolderId)
     {
         try {
             $this->googleDriveManager->delete($fileOrFolderId);
-            // Determine current folder to redirect back to. This is tricky without path context.
-            // You might need to pass the parent_folder_id from the view.
             return redirect()->back()->with('success', 'Item deleted successfully.');
-        } catch (Exception $e) {
-             Log::error("File deletion failed for ID {$fileOrFolderId}: ", ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        } catch (\Exception $e) {
+            Log::error("File deletion failed for ID {$fileOrFolderId}: ", ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return redirect()->back()->with('error', 'Item deletion failed: ' . $e->getMessage());
         }
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|string'
+        ]);
+    
+        $successCount = 0;
+        $failedCount = 0;
+        $errors = [];
+        
+        // Get the JSON string from first array element and decode it
+        $idsJson = $request->input('ids')[0];
+        $ids = json_decode($idsJson, true);
+        
+        if (!is_array($ids)) {
+            return redirect()->back()->with('error', 'Invalid IDs format');
+        }
+        
+        foreach ($ids as $id) {
+            try {
+                $this->googleDriveManager->delete($id);
+                $successCount++;
+            } catch (\Exception $e) {
+                $failedCount++;
+                $errors[] = "Failed to delete item {$id}: " . $e->getMessage();
+                Log::error("Bulk deletion failed for ID {$id}: ", ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            }
+        }
+
+        $message = "Successfully deleted {$successCount} item(s)";
+        if ($failedCount > 0) {
+            $message .= ", failed to delete {$failedCount} item(s)";
+            return redirect()->back()
+                ->with('warning', $message)
+                ->with('errors', $errors);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     private function formatSizeUnits($bytes) // Your helper
@@ -184,5 +260,33 @@ class GDriveController extends Controller
             $bytes = '0 bytes';
         }
         return $bytes;
+    }
+
+    public function createFolder(Request $request)
+    {
+        $request->validate([
+            'folder_name' => 'required|string|max:255',
+            'parent_folder_id' => 'nullable|string',
+        ]);
+
+        try {
+            $folderName = $request->input('folder_name');
+            $parentFolderId = $request->input('parent_folder_id', $this->googleDriveManager->getRootFolderId());
+
+            $folderId = $this->googleDriveManager->createFolder($folderName, $parentFolderId);
+
+            if ($folderId) {
+                return redirect()->route('playground.gdrive.index', [
+                    'path_id' => $parentFolderId
+                ])->with('success', "Folder '{$folderName}' created successfully.");
+            } else {
+                throw new \Exception('Folder creation failed.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Folder creation failed: ', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return redirect()->route('playground.gdrive.index', [
+                'path_id' => $request->input('parent_folder_id', $this->googleDriveManager->getRootFolderId())
+            ])->with('error', 'Folder creation failed: ' . $e->getMessage());
+        }
     }
 }

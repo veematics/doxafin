@@ -117,10 +117,10 @@
                                                     <table class="table border mb-0">
                                                         <thead class="table-light fw-semibold">
                                                             <tr class="align-middle">
-                                                                <th>Title</th>
-                                                                <th>Status</th>
-                                                                <th>Created At</th>
-                                                                <th>Actions</th>
+                                                                <th width="40%">Title</th>
+                                                                <th width="20%">Status</th>
+                                                                <th width="20%">Created At</th>
+                                                                <th width="20%">Actions</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -142,12 +142,12 @@
                                                         <td class="small">{{ \Carbon\Carbon::parse($data->created_at)->format('d F Y H:i') }}</td>
                                                         <td>
                                                             <div class="d-flex flex-column gap-1">
-    <a href="#" class="btn btn-sm btn-info" style="font-size: 0.8rem;" data-coreui-toggle="modal" data-coreui-target="#historyModal" data-log='@json($data->log)'>View History</a>
+    <a href="#" class="btn btn-sm btn-info w-100" style="font-size: 0.8rem;" data-coreui-toggle="modal" data-coreui-target="#historyModal" data-log='@json($data->log)'>History</a>
     @if($can_edit)
-        <a href="#" class="btn btn-sm btn-primary" style="font-size: 0.8rem;">Respond</a>
+        <a href="#" class="btn btn-sm btn-primary w-100" style="font-size: 0.8rem;">Respond</a>
         <form action="#" method="POST">
             @csrf
-            <button type="submit" class="btn btn-sm btn-secondary" style="font-size: 0.8rem;">Archive RC</button>
+            <button type="submit" class="btn btn-sm btn-secondary w-100" style="font-size: 0.8rem;">Archive It</button>
         </form>
     @endif
 </div>
@@ -243,7 +243,11 @@
                                                 <td>{{ Str::limit($change->notes, 50) }}</td>
                                                 <td>{{ $change->archived_at->format('d F Y H:i') }}</td>
                                                 <td>
-                                                    <span class="badge badge-{{ $change->original_status }}">
+                                                    <span class="badge bg-{{ 
+                                                        $change->original_status === 'approved' ? 'success' : 
+                                                        ($change->original_status === 'pending' ? 'warning' : 
+                                                        ($change->original_status === 'rejected' ? 'danger' : 'orange')) 
+                                                    }}">
                                                         {{ ucfirst($change->original_status) }}
                                                     </span>
                                                 </td>
@@ -289,7 +293,7 @@
 @endpush
 
 <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Request Change History</h5>
@@ -300,10 +304,10 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>User</th>
-                                <th>Notes</th>
+                                <th width="20%">Date</th>
+                                <th width="20%">User</th>
+                                <th width="40%">Notes</th>
+                                <th width="20%">Status</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
@@ -324,7 +328,9 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const historyModal = document.getElementById('historyModal');
+      
         if (historyModal) {
+           
             historyModal.addEventListener('show.coreui.modal', function(event) {
                
                 const button = event.relatedTarget;
@@ -332,7 +338,7 @@
                 
                 const tableBody = document.getElementById('historyTableBody');
                 tableBody.innerHTML = '';
-                console.log("Raw log data:", logString);
+                //console.log("Raw log data:", logString);
               
                 // Handle empty data case first
                 if (!logString || logString === 'null') {
@@ -341,31 +347,66 @@
                 }
                 
                 // Try to parse the log data
-                let logData = parseLogData(logString);
-                alert(logData);
-              
+                var logData = parseLogData(logString);
+                 logData = parseLogData(logData);
+                
+                // Handle parsing failures
+                if (!logData || !Array.isArray(logData)) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error parsing history data</td></tr>';
+                    return;
+                }
+
+                // Handle empty array
+               
                 // Handle parsing failures
                 if (!logData) {
                     tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error parsing history data</td></tr>';
                     return;
                 }
                 
-                // Convert to array if it's not already
-                const logs = Array.isArray(logData) ? logData : [logData];
+              
                 
-                // Handle empty array
-                if (logs.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No history data available</td></tr>';
-                    return;
-                }
                 
+                // Clear existing content
+                tableBody.innerHTML = '';
+               
                 // Render each log entry
-                logs.forEach(renderLogEntry);
+                logData.forEach(log => {
+                    
+                    const row = document.createElement('tr');
+               
+                    // Status column
+                // Date column
+                const dateCell = document.createElement('td');
+                dateCell.textContent = log.createDate ? new Date(log.createDate).toLocaleString() : 
+                    (log.created_at ? new Date(log.created_at).toLocaleString() : 'N/A');
+                    row.appendChild(dateCell);
                 
-                // If we get here with no entries rendered, show empty message
-                if (tableBody.children.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No valid history entries found</td></tr>';
-                }
+                
+                // User column
+                const userCell = document.createElement('td');
+                userCell.textContent = log.createByName || log.created_by_name || 'N/A';
+                row.appendChild(userCell);
+                
+                // Notes column
+                const notesCell = document.createElement('td');
+                notesCell.innerHTML = log.notes || 'N/A';
+                row.appendChild(notesCell);
+                
+                // Status column
+                const statusCell = document.createElement('td');
+                const status = log.status || log.Status || 'N/A';
+                const badgeClass = status === 'approved' ? 'bg-success' : 
+                                 (status === 'pending' ? 'bg-warning' : 
+                                 (status === 'rejected' ? 'bg-danger' : 'bg-info'));
+                statusCell.innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
+                row.appendChild(statusCell);
+           
+                
+               
+                    
+                    tableBody.appendChild(row);
+                });
             });
         }
         
@@ -401,28 +442,7 @@
             return null;
         }
         
-        // Helper function to render a single log entry
-        function renderLogEntry(log) {
-            if (!log || typeof log !== 'object') return;
-            
-            const tableBody = document.getElementById('historyTableBody');
-            
-            // Format date safely
-            let formattedDate = formatDate(log.createDate);
-            
-            // Handle HTML content safely
-            const notesContainer = document.createElement('div');
-            notesContainer.innerHTML = log.Notes || 'No notes';
-            
-            tableBody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td><span class="badge bg-${getStatusColor(log.status)}">${log.status || 'unknown'}</span></td>
-                    <td>${formattedDate}</td>
-                    <td>${log.createByName || 'Unknown'}</td>
-                    <td>${notesContainer.innerHTML}</td>
-                </tr>
-            `);
-        }
+       
         
         // Helper function to format dates with fallback
         function formatDate(dateString) {

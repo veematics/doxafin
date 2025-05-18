@@ -85,6 +85,11 @@ class GoogleDriveManager
                 'parents' => [$targetParentFolderId]
             ]);
 
+            if (!file_exists($localFilePath)) {
+                Log::error("[GoogleDriveManager] Local file not found for upload: {$localFilePath}");
+                throw new Exception("Local file not found for upload: {$localFilePath}");
+            }
+            
             $content = file_get_contents($localFilePath);
             if ($content === false) {
                 Log::error("[GoogleDriveManager] Could not read local file content: {$localFilePath}");

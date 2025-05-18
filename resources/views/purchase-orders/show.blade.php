@@ -62,9 +62,10 @@
                                 @if($purchaseOrder->poFiles && count($purchaseOrder->poFiles) > 0)
                                     <ul>
                                         @foreach($purchaseOrder->poFiles as $file)
+                                   
                                             <li>
                                                 <a href="{{ route('media.view', base64_encode($file['file'])) }}" target="_blank" rel="noopener noreferrer">
-                                                    <strong>{{ basename($file['file']) }}</strong>
+                                                    <strong>{{ basename($file['original_name']) }}</strong>
                                                 </a><br>
                                                 <small><em>Notes:</em> {{ $file['notes'] ?? 'No notes' }}</small>
                                             </li>

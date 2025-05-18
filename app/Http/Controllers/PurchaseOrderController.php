@@ -13,10 +13,28 @@ use App\Http\Controllers\RequestChangeController;
 use App\Mail\PurchaseOrderApprovalRequest;
 Use App\Helpers\MailHelper;
 use App\Models\InboxMessage;
+use App\Services\GoogleDriveManager;
 
 class PurchaseOrderController extends Controller
 {
     protected $debug = 1; // Add this line - set to 1 to enable logging, 0 to disable
+    protected function ensureClientFolderExists($clientId)
+    {
+        $googleDrive = app(GoogleDriveManager::class);
+        $rootFolderId = env('GOOGLE_DRIVE_FOLDER_PO_ID');
+        
+        // Check if folder exists for this client
+        $contents = $googleDrive->listContents($rootFolderId);
+        foreach ($contents as $content) {
+            if ($content['isFolder'] && $content['name'] == $clientId) {
+                return $content['id'];
+            }
+        }
+        
+        // Create folder if not exists
+        return $googleDrive->createFolder($clientId, $rootFolderId);
+    }
+    
 
     public function index(Request $request)
     {
@@ -94,8 +112,9 @@ class PurchaseOrderController extends Controller
     {
         if ($this->debug) {
             \Log::info('Store method called with data:', $request->all());
+            \Log::debug('Starting purchase order creation process');
         }
-
+       
         try {
             $validated = $request->validate([
                 'poNo' => 'required|string|unique:purchase_orders,poNo',
@@ -115,6 +134,7 @@ class PurchaseOrderController extends Controller
     
             if ($this->debug) {
                 \Log::info('Validation passed', $validated);
+                \Log::debug('Starting database transaction for PO creation');
             }
     
             $purchaseOrder = null;
@@ -128,19 +148,23 @@ class PurchaseOrderController extends Controller
                             $file = $request->file("poFiles.$index");
                             $originalName = $file->getClientOriginalName();
                             $extension = $file->getClientOriginalExtension();
-                            $filename = pathinfo($originalName, PATHINFO_FILENAME);
+                            $filename = pathinfo($originalName, PATHINFO_FILENAME). '_' . time() . '.' . $extension;
+                            
                             
                             // Check if file exists and append timestamp if needed
-                            $path = $file->storeAs(
-                                'purchase_orders/files',
-                                $filename . '_' . time() . '.' . $extension,
-                                'public'
+                            $clientFolderId = $this->ensureClientFolderExists($validated['poClient']);
+                            $fileId = app(GoogleDriveManager::class)->uploadFile(
+                                $file->getRealPath(),
+                                $filename,
+                                $file->getMimeType(),
+                                $clientFolderId
                             );
                             
                             $filesData[] = [
-                                'file' => $path,
+                                'file' => $fileId,
                                 'original_name' => $originalName,
-                                'notes' => $note
+                                'notes' => $note,
+                                'filename' => $filename
                             ];
                         }
                     }
@@ -148,6 +172,7 @@ class PurchaseOrderController extends Controller
         
                 if ($this->debug) {
                     \Log::info('Files processed', $filesData);
+                    \Log::debug('Processed ' . count($filesData) . ' files for PO');
                 }
                 
                 $purchaseOrder = PurchaseOrder::create([
@@ -165,6 +190,8 @@ class PurchaseOrderController extends Controller
     
                 if ($this->debug) {
                     \Log::info('Purchase order created', $purchaseOrder->toArray());
+                    \Log::debug('Created PO with ID: ' . $purchaseOrder->poID);
+                    \Log::debug('Starting to create service items');
                 }
                 
                 // Save related service items
@@ -181,6 +208,7 @@ class PurchaseOrderController extends Controller
         
             if ($this->debug) {
                 \Log::info('Transaction completed successfully');
+                \Log::debug('Successfully created PO with ' . $purchaseOrder->serviceItems->count() . ' service items');
             }
     
             if (!$purchaseOrder) {
@@ -193,6 +221,7 @@ class PurchaseOrderController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($this->debug) {
                 \Log::error('Validation failed: ' . $e->getMessage(), $e->errors());
+                \Log::debug('Validation errors occurred during PO creation');
             }
             return back()
                 ->withErrors($e->errors())
@@ -200,6 +229,7 @@ class PurchaseOrderController extends Controller
         } catch (\Exception $e) {
             if ($this->debug) {
                 \Log::error('Error creating purchase order: ' . $e->getMessage());
+                \Log::debug('Error occurred at: ' . $e->getFile() . ':' . $e->getLine());
             }
             return back()
                 ->withInput($request->all()) // Preserve all input data
@@ -508,6 +538,37 @@ class PurchaseOrderController extends Controller
 
         $purchaseOrder->delete();
         return redirect()->route('purchase-orders.index')->with('success', 'Purchase Order deleted successfully.');
+    }
+
+    public function requestChange(PurchaseOrder $purchaseOrder, $requestChangeId)
+    {
+       
+        $requestChangeController = new RequestChangeController();
+        $requestChange = $requestChangeController->getById($requestChangeId);
+        
+      
+        // Load necessary relationships
+        $purchaseOrder->load(['client', 'serviceItems']);
+        
+        // Check user permissions
+        $userId = auth()->id();
+        $featureId = FeatureAccess::getFeatureID('Purchase Order');
+        $permissions = Cache::get('user_permissions_' . $userId);
+       
+ 
+        if (!isset($permissions[$featureId])) {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $canEdit = $permissions[$featureId][0]->can_edit;
+        $canApprove = $permissions[$featureId][0]->can_approve;
+        
+        return view('purchase-orders.request-change', [
+            'purchaseOrder' => $purchaseOrder,
+            'requestChange' => $requestChange,
+            'canEdit' => $canEdit,
+            'canApprove' => $canApprove,
+        ]);
     }
 }
 

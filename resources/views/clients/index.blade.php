@@ -29,11 +29,15 @@
                                         <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>All items</option>
                                     </select>
                                     <button class="btn btn-outline-secondary" type="submit">
-                                        <i class="cil-search"></i>
+                                        <svg class="icon">
+                                            <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-search"></use>
+                                        </svg>
                                     </button>
                                     @if(request('search') || request('per_page'))
                                         <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary">
-                                            <i class="cil-x"></i>
+                                            <svg class="icon">
+                                                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-x"></use>
+                                            </svg>
                                         </a>
                                     @endif
                                 </div>
@@ -73,17 +77,23 @@
                                         <td>{{ $client->contacts_count ?? $client->contacts->count() }}</td>
                                         <td>
                                             <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-info">
-                                                <i class="cil-people"></i>
+                                                <svg class="icon">
+                                                    <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-people"></use>
+                                                </svg>
                                             </a>
                                             <a href="{{ route('clients.edit', $client) }}" class="btn btn-sm btn-primary">
-                                                <i class="cil-pencil"></i>
+                                                <svg class="icon">
+                                                    <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-pencil"></use>
+                                                </svg>
                                             </a>
                                             <form action="{{ route('clients.destroy', $client) }}" method="POST" class="d-inline" 
                                                   onsubmit="return confirm('Are you sure you want to delete this client?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="cil-trash"></i>
+                                                    <svg class="icon">
+                                                        <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-trash"></use>
+                                                    </svg>
                                                 </button>
                                             </form>
                                         </td>

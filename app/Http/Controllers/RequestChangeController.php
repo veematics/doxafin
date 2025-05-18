@@ -117,7 +117,7 @@ class RequestChangeController extends Controller
                         'createDate' => now(),
                         'createBy' => Auth::id(),
                         'createByName' => Auth::user()->name,
-                        'Notes' => $validated['notes']
+                        'notes' => $validated['notes']
                     ]
                 ])
             ];
@@ -148,6 +148,11 @@ class RequestChangeController extends Controller
     public function show(RequestChange $requestChange)
     {
         return view('request-changes.show', compact('requestChange'));
+    }
+    
+    public function getById($id)
+    {
+        return RequestChange::findOrFail($id);
     }
 
     public function approve(Request $request, RequestChange $requestChange)
@@ -239,4 +244,6 @@ class RequestChangeController extends Controller
             return back()->with('error', 'Failed to unarchive request: ' . $e->getMessage());
         }
     }
+
+
 }
