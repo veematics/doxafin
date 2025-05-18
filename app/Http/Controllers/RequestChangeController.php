@@ -152,7 +152,7 @@ class RequestChangeController extends Controller
     
     public function getById($id)
     {
-        return RequestChange::findOrFail($id);
+        return RequestChange::with(['creator:id,name'])->find($id);
     }
 
     public function approve(Request $request, RequestChange $requestChange)

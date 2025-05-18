@@ -144,7 +144,12 @@
                                                             <div class="d-flex flex-column gap-1">
     <a href="#" class="btn btn-sm btn-info w-100" style="font-size: 0.8rem;" data-coreui-toggle="modal" data-coreui-target="#historyModal" data-log='@json($data->log)'>History</a>
     @if($can_edit)
-        <a href="#" class="btn btn-sm btn-primary w-100" style="font-size: 0.8rem;">Respond</a>
+@php
+    if($data->changeable_type=='App\Models\PurchaseOrder'){
+        $url = route('purchase-orders.rc', [$data->changeable_id, $data->id]);
+    }
+@endphp                                                                
+        <a href="{{ $url }}" class="btn btn-sm btn-primary w-100" style="font-size: 0.8rem;">Respond</a>
         <form action="#" method="POST">
             @csrf
             <button type="submit" class="btn btn-sm btn-secondary w-100" style="font-size: 0.8rem;">Archive It</button>

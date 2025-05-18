@@ -12,7 +12,7 @@
         @endphp
       
     <x-slot name="header">
-            <h1 class="text-2xl font-bold mb-6">Purchase Order Monitoring</h1>
+            <h1 class="text-2xl font-bold mb-6">Purchase Order Request Changes</h1>
         </x-slot>
         
         <div class="container mx-auto px-4 py-6">
@@ -88,57 +88,56 @@
                 <div class="col-md-6">
                     <div class="card mb-3">
                         <div class="card-header">Operational & Status
-                            {{ $requestChange }}
+                            
                         </div>
                         <div class="card-body">
                             <p class="text-muted">Status: <strong>{{ $purchaseOrder->poStatus ?? 'Not Set' }}</strong></p>
-                            Operation:<br/>
-                            <ul>
-                            @if (($purchaseOrder->poStatus == "Draft" && $can_edit=='1')||$can_approve=='1')
-                              
-                                <li><a href="{{ route('purchase-orders.edit', $purchaseOrder) }}">Edit</a></li>
+                           
+                        </div>
+                    </div>
+                    @if($requestChange)
+                 
+                    <div class="card  mb-3">
+                        <div class="card-header">Request Changes</div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Requested By:</dt>
+                                <dd class="col-sm-8">{{ $requestChange->creator->name ?? 'N/A' }}</dd>
+                                <dt class="col-sm-4">Request Date:</dt>
+                                <dd class="col-sm-8">{{ $requestChange->created_at->format('d-m-Y H:i') }}</dd>
+                                <dt class="col-sm-4">Current Request Status:</dt>
+                                <dd class="col-sm-8">{{ $requestChange->status }}</dd>
+                                
+                                
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">History</div>
+                        <div class="card-body">
+                            <dd class="col-sm-8">
+                                @if(is_array($requestChange->changes))
+                                    <ul class="list-unstyled">
+                                        @foreach($requestChange->changes as $field => $change)
+                                            <li>
+                                                <strong>{{ ucfirst(str_replace('_', ' ', $field)) }}:</strong>
+                                                {{ $change['before'] }} → {{ $change['after'] }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    {{ $requestChange->changes }}
                                 @endif
-    
-                                @if ($purchaseOrder->poStatus == "Draft" && $can_edit=='1')
-                                <li><a href="#" onclick="confirmApproval(event, {{ $purchaseOrder->id }})">Submit for Approval</a></li>
-                                @endif
-                                <li>Change Request</li>
-                                <li>Add Activity Logs</li>
-                            </ul>
+                            </dd>
                         </div>
                     </div>
+                @endif
     
-                    <div class="card mb-3">
-                        <div class="card-header">Invoice Status</div>
-                        <div class="card-body">
-                            <p class="text-muted">Invoice Created:0
-                                <br/>
-                                    Invoice Completed:0<br/>
-                                    Active Invoice Due:0<br/>
-                                    Total Invoice Value:Rp. 0<br/>
-                                    Total Remaining Balance: Rp. 0<br/>
-                            </p>
-                        </div>
-                    </div>
+                   
     
-                    <div class="card mb-3">
-                        <div class="card-header">Payment Status</div>
-                        <div class="card-body">
-                            <p class="text-muted"><p class="text-muted">
-                                   No of Payment: 0<br/>
-                                   Total Payment Value:Rp. 0<br/>
-                                   Remaining Payment Value:Rp. 0<br/>
-                                    
-                            </p></p>
-                        </div>
-                    </div>
+                   
     
-                    <div class="card mb-3">
-                        <div class="card-header">Activity Log</div>
-                        <div class="card-body">
-                            <p class="text-muted">Recent activities and history will be displayed here</p>
-                        </div>
-                    </div>
+                   
                 </div>
             </div>
         </div>
