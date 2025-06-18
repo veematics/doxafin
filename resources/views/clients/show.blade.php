@@ -3,7 +3,9 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">{{ __('Client Details') }}</h2>
             <a href="{{ route('clients.index') }}" class="btn btn-primary btn-sm">
-                <i class="cil-arrow-left"></i> {{ __('Back to List') }}
+                <svg class="icon">
+                    <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-arrow-left"></use>
+                </svg> {{ __('Back to List') }}
             </a>
         </div>
 
@@ -90,7 +92,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="mb-0">{{ __('Contacts') }} ({{ $client->contacts->count() }})</h6>
                     <button type="button" class="btn btn-primary btn-sm" data-coreui-toggle="modal" data-coreui-target="#addContactModal">
-                        <i class="cil-plus"></i> {{ __('Add Contact') }}
+                        <svg class="icon">
+                            <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-plus"></use>
+                        </svg> {{ __('Add Contact') }}
                     </button>
                 </div>
                 <div class="table-responsive">
@@ -110,7 +114,9 @@
                                     <td class="position-relative">
                                         {{ $contact->name }}
                                         @if($contact->is_primary)
-                                            <i class="cil-star text-warning ms-2" title="{{ __('Primary Contact') }}"></i>
+                                            <svg class="icon text-warning ms-2" title="{{ __('Primary Contact') }}">
+                                                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-star"></use>
+                                            </svg>
                                         @else
                                             <a href="#" class="make-primary-contact ms-2 text-muted" style="display:none"
                                                onclick="event.preventDefault(); document.getElementById('make-primary-{{ $contact->id }}').submit();">
@@ -130,7 +136,9 @@
                                     <td>
                                         <a href="{{ route('clients.contacts.edit', [$client, $contact]) }}" 
                                            class="btn btn-sm btn-primary">
-                                            <i class="cil-pencil"></i>
+                                            <svg class="icon">
+                                                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-pencil"></use>
+                                            </svg>
                                         </a>
                                         <form action="{{ route('clients.contacts.destroy', [$client, $contact]) }}" 
                                               method="POST" class="d-inline">
@@ -138,7 +146,9 @@
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" 
                                                     onclick="return confirm('{{ __('Are you sure?') }}')">
-                                                <i class="cil-trash"></i>
+                                                <svg class="icon">
+                                                    <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-trash"></use>
+                                                </svg>
                                             </button>
                                         </form>
                                     </td>

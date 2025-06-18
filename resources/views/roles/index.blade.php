@@ -15,7 +15,9 @@
                 </div>
                 <div class="col-md-6 text-end">
                     <a href="{{ route('appsetting.roles.create') }}" class="btn btn-primary">
-                        <i class="cil-plus me-2"></i>Create New Role
+                        <svg class="icon me-2">
+                            <use xlink:href="{{ asset('assets/icons/free/free.svg#cil-plus') }}"></use>
+                        </svg>Create New Role
                     </a>
                 </div>
             </div>
@@ -47,13 +49,17 @@
                                                    class="btn btn-sm btn-outline-primary" 
                                                    data-coreui-toggle="tooltip" 
                                                    title="Manage Members">
-                                                    <i class="cil-people"></i>
+                                                    <svg class="icon">
+                                                        <use xlink:href="{{ asset('assets/icons/free/free.svg#cil-people') }}"></use>
+                                                    </svg>
                                                 </a>
                                                 <a href="{{ route('appsetting.roles.edit', $role) }}" 
                                                    class="btn btn-sm btn-outline-info" 
                                                    data-coreui-toggle="tooltip" 
                                                    title="Edit Role">
-                                                    <i class="cil-pencil"></i>
+                                                    <svg class="icon">
+                                                        <use xlink:href="{{ asset('assets/icons/free/free.svg#cil-pencil') }}"></use>
+                                                    </svg>
                                                 </a>
                                                 <form action="{{ route('appsetting.roles.duplicate', $role) }}" 
                                                       method="POST" 
@@ -63,7 +69,9 @@
                                                             class="btn btn-sm btn-outline-success" 
                                                             data-coreui-toggle="tooltip" 
                                                             title="Duplicate Role">
-                                                        <i class="cil-copy"></i>
+                                                        <svg class="icon">
+                                                            <use xlink:href="{{ asset('assets/icons/free/free.svg#cil-copy') }}"></use>
+                                                        </svg>
                                                     </button>
                                                 </form>
                                                 <form action="{{ route('appsetting.roles.destroy', $role) }}" 
@@ -76,7 +84,9 @@
                                                             data-coreui-toggle="tooltip" 
                                                             title="Delete Role"
                                                             onclick="return confirm('Are you sure you want to delete this role?');">
-                                                        <i class="cil-trash"></i>
+                                                        <svg class="icon">
+                                                            <use xlink:href="{{ asset('assets/icons/free/free.svg#cil-trash') }}"></use>
+                                                        </svg>
                                                     </button>
                                                 </form>
                                             </div>
