@@ -1,5 +1,6 @@
 <x-app-layout>
     @php
+
         $featureId = 5;
          $userId = auth()->id();
         $cacheKey = 'user_permissions_' . $userId;

@@ -15,6 +15,7 @@ use App\Http\Controllers\InboxMessageController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CsvDataController;
+use App\Http\Controllers\LogController;
 
 
 
@@ -191,6 +192,7 @@ Route::get('/dashboard', function () {
         });
 
     });
+  
     // Update the CSV data routes
     // CSV Data Routes - simplified version
     Route::middleware('auth')->group(function () {
@@ -242,6 +244,10 @@ Route::get('/dashboard', function () {
     //     Route::get('/clients/{client}', [ClientController::class, 'getClientDetails']);
     // });
 });
+  // Request Change Routes
+    Route::post('request-changes/{requestChange}/approve', [RequestChangeController::class, 'approve'])->name('request-changes.approve');
+    Route::post('request-changes/{requestChange}/update-status', [RequestChangeController::class, 'updateStatus'])->name('request-changes.update-status');
+
 Route::middleware(['auth'])->prefix('rc')->name('request-changes.')->group(function () {
     Route::get('/', [RequestChangeController::class, 'index'])->name('index');
     Route::get('/create', [RequestChangeController::class, 'create'])->name('create');
@@ -255,8 +261,29 @@ Route::middleware(['auth'])->prefix('rc')->name('request-changes.')->group(funct
     Route::post('/{requestChange}/request-revision', [RequestChangeController::class, 'requestRevision'])->name('request-revision');
     Route::post('/{requestChange}/archive', [RequestChangeController::class, 'archive'])->name('archive');
     Route::post('/{requestChange}/unarchive', [RequestChangeController::class, 'unarchive'])->name('unarchive');
+    Route::post('/{requestChange}/respond', [RequestChangeController::class, 'respond'])->name('respond');
 });
  
+// Notes Routes
+Route::middleware(['auth'])->group(function () {
+    Route::post('/notes', [\App\Http\Controllers\NotesController::class, 'store'])->name('notes.store');
+    Route::get('/notes/{note}', [\App\Http\Controllers\NotesController::class, 'show'])->name('notes.show');
+    Route::put('/notes/{note}', [\App\Http\Controllers\NotesController::class, 'update'])->name('notes.update');
+    Route::delete('/notes/{note}', [\App\Http\Controllers\NotesController::class, 'destroy'])->name('notes.destroy');
+});
+
+// Log Routes
+Route::middleware(['auth'])->prefix('logs')->name('logs.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\LogController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\LogController::class, 'create'])->name('create');
+    Route::post('/', [\App\Http\Controllers\LogController::class, 'store'])->name('store');
+    Route::get('/{log}', [\App\Http\Controllers\LogController::class, 'show'])->name('show');
+    Route::get('/{log}/edit', [\App\Http\Controllers\LogController::class, 'edit'])->name('edit');
+    Route::put('/{log}', [\App\Http\Controllers\LogController::class, 'update'])->name('update');
+    Route::delete('/{log}', [\App\Http\Controllers\LogController::class, 'destroy'])->name('destroy');
+    Route::get('/object-logs', [\App\Http\Controllers\LogController::class, 'getObjectLogs'])->name('object-logs');
+});
+
 require __DIR__.'/auth.php';
 
 

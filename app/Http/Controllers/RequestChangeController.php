@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\RequestChange;
 use App\Models\User;
+use App\Models\CsvData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\FeatureAccess;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 
 class RequestChangeController extends Controller
 {
@@ -16,7 +19,7 @@ class RequestChangeController extends Controller
     protected function log($message, $context = [])
     {
         if ($this->debug) {
-            \Log::info($message, $context);
+            Log::info($message, $context);
         }
     }
 
@@ -25,7 +28,8 @@ class RequestChangeController extends Controller
         $activeRC = DB::table('request_changes')
             ->leftJoin('users as creator', 'request_changes.created_by', '=', 'creator.id')
             ->leftJoin('users as approver', 'request_changes.approved_by', '=', 'approver.id')
-            ->select('request_changes.*', 'creator.name as creator_name', 'approver.name as approver_name', 'request_changes.created_at')
+            ->leftJoin('clients', 'request_changes.client_id', '=', 'clients.id')
+            ->select('request_changes.*', 'creator.name as creator_name', 'approver.name as approver_name', 'clients.company_name as client_name', 'request_changes.created_at')
             ->where('is_archived', false)
             ->orderBy('request_changes.updated_at', 'desc')
             ->get()
@@ -34,14 +38,27 @@ class RequestChangeController extends Controller
         $archivedRC = DB::table('request_changes')
             ->leftJoin('users as creator', 'request_changes.created_by', '=', 'creator.id')
             ->leftJoin('users as approver', 'request_changes.approved_by', '=', 'approver.id')
-            ->select('request_changes.*', 'creator.name as creator_name', 'approver.name as approver_name', 'request_changes.created_at')
+            ->leftJoin('clients', 'request_changes.client_id', '=', 'clients.id')
+            ->select('request_changes.*', 'creator.name as creator_name', 'approver.name as approver_name', 'clients.company_name as client_name', 'request_changes.created_at')
             ->where('is_archived', true)
             ->orderBy('request_changes.archived_at', 'desc')
             ->paginate(10);
 
         $clients = \App\Models\Client::orderBy('company_name')->get();
 
-        return view('request-changes.index', compact('activeRC', 'archivedRC', 'clients'));
+        $rcStatusData = CsvData::where('data_name', 'RC Status')->first();
+        $statusColors = [];
+        if ($rcStatusData) {
+            $lines = explode("\n", $rcStatusData->data_value);
+            foreach ($lines as $line) {
+                $parts = explode(',', $line);
+                if (count($parts) == 2) {
+                    $statusColors[trim($parts[0])] = trim($parts[1]);
+                }
+            }
+        }
+
+        return view('request-changes.index', compact('activeRC', 'archivedRC', 'clients', 'statusColors'));
     }
 
     // public function create()
@@ -157,27 +174,84 @@ class RequestChangeController extends Controller
 
     public function approve(Request $request, RequestChange $requestChange)
     {
+        // Ensure the user has permission and the request is pending
         if (!FeatureAccess::canEdit('request_changes') || $requestChange->status !== 'pending') {
-            abort(403, 'Unauthorized action or invalid status.');
+            return response()->json(['success' => false, 'message' => 'Unauthorized action or request is not pending.'], 403);
         }
 
+        // Validate the incoming request for the 'change' data
+        $validated = $request->validate([
+            'change' => 'required|array',
+            'change.field' => 'required|string',
+            'change.before' => 'nullable',
+            'change.after' => 'nullable',
+        ]);
+
+        $changeData = $validated['change'];
+        $fieldToUpdate = $changeData['field'];
+        $newValue = $changeData['after'];
+
         try {
-            DB::transaction(function () use ($requestChange) {
+            DB::transaction(function () use ($requestChange, $fieldToUpdate, $newValue) {
+                // Update the RequestChange status
                 $requestChange->update([
                     'status' => 'approved',
                     'approved_by' => Auth::id(),
                     'approved_at' => now()
                 ]);
 
-                // Apply changes to the changeable model
+                // Apply the specific change to the changeable model
                 $model = $requestChange->changeable_type::find($requestChange->changeable_id);
-                $model->update($requestChange->changes);
+                if ($model) {
+                    $model->update([$fieldToUpdate => $newValue]);
+                } else {
+                    throw new \Exception('Changeable model not found.');
+                }
             });
 
-            return redirect()->route('request-changes.index')
-                ->with('success', 'Request change approved successfully.');
+            return response()->json(['success' => true, 'message' => 'Request change approved successfully.']);
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to approve request: ' . $e->getMessage());
+            Log::error('Error approving request change: ' . $e->getMessage(), ['request_change_id' => $requestChange->id, 'exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Failed to approve request: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateStatus(Request $request, RequestChange $requestChange)
+    {
+        // Ensure the user has permission
+        if (!FeatureAccess::canEdit('request_changes')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+
+        // Validate the incoming request
+        $validated = $request->validate([
+            'status' => 'required|string|in:' . implode(',', array_keys(RequestChange::statuses())),
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::transaction(function () use ($requestChange, $validated) {
+                $requestChange->update([
+                    'status' => $validated['status'],
+                    'notes' => $validated['notes'],
+                ]);
+
+                // Optionally, you might want to log this status update in the 'log' column
+                $currentLog = json_decode($requestChange->log, true) ?? [];
+                $currentLog[] = [
+                    'status' => $validated['status'],
+                    'createDate' => now()->toDateTimeString(),
+                    'createBy' => Auth::id(),
+                    'createByName' => Auth::user()->name,
+                    'notes' => $validated['notes']
+                ];
+                $requestChange->update(['log' => json_encode($currentLog)]);
+            });
+
+            return response()->json(['success' => true, 'message' => 'Request status updated successfully.']);
+        } catch (\Exception $e) {
+            Log::error('Error updating request change status: ' . $e->getMessage(), ['request_change_id' => $requestChange->id, 'exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Failed to update status: ' . $e->getMessage()], 500);
         }
     }
 
@@ -245,5 +319,75 @@ class RequestChangeController extends Controller
         }
     }
 
+    /**
+     * Handle the action respond functionality
+     * 
+     * @param RequestChange $requestChange
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function respond(RequestChange $requestChange, Request $request)
+    {
+        // Log the incoming request data for debugging
+        $this->log('Respond method called with data:', [
+            'request_data' => $request->all(),
+            'request_change_id' => $requestChange->id,
+            'changeable_id' => $requestChange->changeable_id,
+            'category' => $requestChange->category
+        ]);
+        //currentuserid
+        $currentUserID = Auth::id();
+        //Get FeatureID by Category
+        $featureID = FeatureAccess::getFeatureID($requestChange->category);
+        
+        
+        // Check if user has permission to edit request changes
+        if (!FeatureAccess::canApproveById($currentUserID,$featureID)) {
+            abort(403, 'Unauthorized action.');
+        }
+
+       
+        
+        // Update the status to 'on progress' if user confirmed
+        if ($request->input('confirm') === 'yes') {
+            // Get current log data
+            $logData = json_decode($requestChange->log, true) ?? [];
+            
+            // Add new log entry
+            $logData[] = [
+                'status' => 'on progress',
+                'createDate' => now(),
+                'createBy' => Auth::id(),
+                'createByName' => Auth::user()->name,
+                'notes' => 'Status updated to on progress'
+            ];
+            
+            // Update the request change
+            $requestChange->update([
+                'status' => 'on progress',
+                'log' => json_encode($logData)
+            ]);
+        }
+        
+        // Redirect based on category
+        switch ($requestChange->category) {
+            case 'Purchase Order':
+                return redirect()->route('purchase-orders.show', $requestChange->changeable_id);
+            case 'Invoice':
+                // Placeholder for now
+                return redirect()->route('request-changes.index')
+                    ->with('info', 'Invoice module is not yet implemented.');
+            case 'Payment':
+                // Placeholder for now
+                return redirect()->route('request-changes.index')
+                    ->with('info', 'Payment module is not yet implemented.');
+            case 'Service':
+                // Placeholder for now
+                return redirect()->route('request-changes.index')
+                    ->with('info', 'Service module is not yet implemented.');
+            default:
+                return redirect()->route('request-changes.index');
+        }
+    }
 
 }

@@ -157,6 +157,50 @@ class GoogleDriveManager
     }
 
     /**
+     * Deletes a file by its ID (alias for delete method).
+     */
+    public function deleteFile(string $fileId): bool
+    {
+        return $this->delete($fileId); 
+    }
+
+    /**
+     * Gets the file ID by searching for a file with the specified filename.
+     * Returns the file ID if found, null if not found.
+     * Searches within the specified folder or root folder by default.
+     */
+    public function getFileID(string $filename, string $folderId = null): ?string
+    {
+        $targetFolderId = $folderId ?: $this->rootFolderId;
+        Log::debug("[GoogleDriveManager] Searching for file '{$filename}' in folder ID: {$targetFolderId}");
+
+        try {
+            // Search for files with the exact filename
+            $response = $this->driveService->files->listFiles([
+                'q' => "name='{$filename}' and '{$targetFolderId}' in parents and trashed=false",
+                'fields' => 'files(id, name)',
+                'supportsAllDrives' => true,
+            ]);
+
+            $files = $response->getFiles();
+            
+            if (empty($files)) {
+                Log::debug("[GoogleDriveManager] File '{$filename}' not found in folder {$targetFolderId}");
+                return null;
+            }
+
+            // Return the first match (there should typically be only one with exact name match)
+            $file = $files[0];
+            Log::info("[GoogleDriveManager] Found file '{$filename}' with ID: {$file->getId()}");
+            return $file->getId();
+
+        } catch (Exception $e) {
+            Log::error("[GoogleDriveManager] Error searching for file '{$filename}': " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * Downloads a file by its ID.
      * Returns file content as a string or null on error.
      */

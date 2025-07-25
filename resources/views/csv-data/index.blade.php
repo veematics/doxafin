@@ -25,17 +25,23 @@
                                 <td>
                                     <button type="button" class="btn btn-sm btn-info" data-coreui-toggle="modal" 
                                             data-coreui-target="#viewModal{{ $data->id }}">
-                                        <i class="cil-list"></i>
+                                        <svg class="icon">
+                                            <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-list"></use>
+                                        </svg>
                                     </button>
                                     <a href="{{ route('csv-data.edit', $data) }}" class="btn btn-sm btn-primary">
-                                        <i class="cil-pencil"></i>
+                                        <svg class="icon">
+                                            <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-pencil"></use>
+                                        </svg>
                                     </a>
                                     <form action="{{ route('csv-data.destroy', $data) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger" 
                                                 onclick="return confirm('{{ __('Are you sure?') }}')">
-                                            <i class="cil-trash"></i>
+                                            <svg class="icon">
+                                                <use xlink:href="{{ asset('assets/icons/free/free.svg') }}#cil-trash"></use>
+                                            </svg>
                                         </button>
                                     </form>
                                 </td>

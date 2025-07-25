@@ -3,15 +3,16 @@
     <script src="{{ asset('js/request-changes.js') }}"></script>
 @endpush
 @php
-        $featureId = 11;
-        $userId = auth()->id();
-        $cacheKey = 'user_permissions_' . $userId;
-        $permissions = Cache::get($cacheKey);
-        $can_view = $permissions[$featureId][0]->can_view;
-        $can_create = $permissions[$featureId][0]->can_create;
-        $can_approve = $permissions[$featureId][0]->can_approve;
-        $can_edit = $permissions[$featureId][0]->can_edit;
-        $can_delete = $permissions[$featureId][0]->can_delete;
+
+$featureId = 11;
+ $userId = auth()->id();
+$cacheKey = 'user_permissions_' . $userId;
+$permissions = Cache::get($cacheKey);
+$can_view = $permissions[$featureId][0]->can_view;
+$can_create = $permissions[$featureId][0]->can_create;
+$can_approve = $permissions[$featureId][0]->can_approve;
+$can_edit = $permissions[$featureId][0]->can_edit;
+$can_delete = $permissions[$featureId][0]->can_delete;
 @endphp
     <div class="body flex-grow-1 px-3">
         <div class="container-lg">
@@ -80,72 +81,46 @@
                             </div>
                             <div class="row">
                                 @php
-                                    $groupedChanges = $activeRC->groupBy('category');
-                                    $changes=$groupedChanges[null];
-                                    $currentCategoryRC = null;
-                            
-                                        
+                                    // $activeRC is already grouped by category from the controller
+                                    $categories = $activeRC->keys();
                                 @endphp
-
-                                @foreach($changes as $items => $item)
-                                    @php
-                                 
-                      
-                                if($currentCategoryRC!=$item[0]->category ){
-                                    if($currentCategoryRC!=null){
-                                        echo '</tbody>
-                                        </table>
-                                    </div></div>
-                                        </div>
-                                        </div>';
-                                    };
-                                    $currentCategoryRC=$item[0]->category;
-                                    $isChangeCategory=true;
-                                }else{
-                                    $isChangeCategory=false;
-                                }
-
-                                    @endphp
-                                    @if ( $isChangeCategory=true)
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card mb-4">
-                                            <div class="card-header">
-                                                <h4 class="card-title mb-0">{{ $currentCategoryRC }}</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                    <table class="table border mb-0">
-                                                        <thead class="table-light fw-semibold">
-                                                            <tr class="align-middle">
-                                                                <th width="40%">Title</th>
-                                                                <th width="20%">Status</th>
-                                                                <th width="20%">Created At</th>
-                                                                <th width="20%">Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                    @endif
                                 
-                                                @foreach($item as $data)
+                                @foreach($activeRC as $category => $changes)
+
+                                <div class="col-md-6 mb-4">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h4 class="card-title mb-0">{{ $category ?? 'Uncategorized' }}</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table border mb-0">
+                                                    <thead class="table-light fw-semibold">
+                                                        <tr class="align-middle">
+                                                            <th width="40%">Title</th>
+                                                            <th width="20%">Status</th>
+                                                            <th width="20%">Last Update</th>
+                                                            <th width="20%">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($changes as $data)
                                                
                                                     <tr class="align-middle">
                                                         <td class="small">{{ $data->title }}<br/>C: <a href="{{ route('clients.show', $data->client_id) }}" target="_blank">{{ $data->client_name }}</a></td>
                                                         <td>
-                                                            <span class="badge rounded-pill bg-{{ 
-                                                            $data->status === 'approved' ? 'success' : 
-                                                            ($data->status === 'pending' ? 'warning' : 
-                                                            ($data->status === 'rejected' ? 'danger' : 'orange')) 
-                                                        }}">
+                                                          
+                                                            <span class="badge rounded-pill bg-{{ $statusColors[$data->status] ?? 'primary' }}">
                                                             {{ ucfirst($data->status) }}
                                                         </span>
                                                         </td>
-                                                        <td class="small">{{ \Carbon\Carbon::parse($data->created_at)->format('d F Y H:i') }}</td>
+                                                        <td class="small">{{ \Carbon\Carbon::parse($data->updated_at)->format('d F Y H:i') }}</td>
                                                         <td>
                                                             <div class="d-flex flex-column gap-1">
     <a href="#" class="btn btn-sm btn-info w-100" style="font-size: 0.8rem;" data-coreui-toggle="modal" data-coreui-target="#historyModal" data-log='@json($data->log)'>History</a>
     @if($can_edit)
-        <a href="#" class="btn btn-sm btn-primary w-100" style="font-size: 0.8rem;">Respond</a>
-        <form action="#" method="POST">
+        <a href="#" class="btn btn-sm btn-primary w-100" style="font-size: 0.8rem;" data-coreui-toggle="modal" data-coreui-target="#respondModal" data-id="{{ $data->id }}" data-changeable-id="{{ $data->changeable_id }}" data-category="{{ $data->category }}">Respond</a>
+        <form action="{{ route('request-changes.archive', $data->id) }}" method="POST">
             @csrf
             <button type="submit" class="btn btn-sm btn-secondary w-100" style="font-size: 0.8rem;">Archive It</button>
         </form>
@@ -154,14 +129,13 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
-                                            
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
-                                     </div>
                                     </div>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
 
@@ -243,20 +217,16 @@
                                                 <td>{{ Str::limit($change->notes, 50) }}</td>
                                                 <td>{{ $change->archived_at->format('d F Y H:i') }}</td>
                                                 <td>
-                                                    <span class="badge bg-{{ 
-                                                        $change->original_status === 'approved' ? 'success' : 
-                                                        ($change->original_status === 'pending' ? 'warning' : 
-                                                        ($change->original_status === 'rejected' ? 'danger' : 'orange')) 
-                                                    }}">
+                                                    <span class="badge bg-{{ $statusColors[$change->original_status] ?? 'primary' }}>
                                                         {{ ucfirst($change->original_status) }}
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="{{ route('request-changes.show', $change) }}" 
+                                                        <a href="{{ route('request-changes.show', $change->id) }}" 
                                                            class="btn btn-sm btn-info">View</a>
                                                         @if($can_edit)
-                                                            <form action="{{ route('request-changes.unarchive', $change) }}" method="POST" class="d-inline">
+                                                            <form action="{{ route('request-changes.unarchive', $change->id) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <button type="submit" class="btn btn-sm btn-warning">Unarchive</button>
                                                             </form>
@@ -323,16 +293,50 @@
     </div>
 </div>
 
+<!-- Respond Modal -->
+<div class="modal fade" id="respondModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Respond to Request Change</h5>
+                <button class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Would you like to mark this request as "on progress"?</p>
+                <p>This will update the status and redirect you to the appropriate page based on the request category.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="respondFormNo" method="POST" action="" style="display: inline;">
+                    @csrf
+                    <input type="hidden" name="confirm" value="no">
+                    <input type="hidden" name="request_id" id="requestChangeIdNo">
+                    <input type="hidden" name="changeable_id" id="changeableIdNo">
+                    <input type="hidden" name="category" id="categoryNo">
+                    <button type="submit" class="btn btn-secondary">No, I'll adjust manually</button>
+                </form>
+                <form id="respondFormYes" method="POST" action="" style="display: inline;">
+                    @csrf
+                    <input type="hidden" name="confirm" value="yes">
+                    <input type="hidden" name="request_id" id="requestChangeIdYes">
+                    <input type="hidden" name="changeable_id" id="changeableIdYes">
+                    <input type="hidden" name="category" id="categoryYes">
+                    <button type="submit" class="btn btn-primary">Yes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // History Modal Handling
         const historyModal = document.getElementById('historyModal');
-      
+        const respondModal = document.getElementById('respondModal');
+
         if (historyModal) {
-           
             historyModal.addEventListener('show.coreui.modal', function(event) {
-               
                 const button = event.relatedTarget;
                 const logString = button.dataset.log;
                 
@@ -348,7 +352,7 @@
                 
                 // Try to parse the log data
                 var logData = parseLogData(logString);
-                 logData = parseLogData(logData);
+                logData = parseLogData(logData);
                 
                 // Handle parsing failures
                 if (!logData || !Array.isArray(logData)) {
@@ -364,51 +368,95 @@
                     return;
                 }
                 
-              
-                
-                
                 // Clear existing content
                 tableBody.innerHTML = '';
                
                 // Render each log entry
                 logData.forEach(log => {
-                    
                     const row = document.createElement('tr');
                
-                    // Status column
-                // Date column
-                const dateCell = document.createElement('td');
-                dateCell.textContent = log.createDate ? new Date(log.createDate).toLocaleString() : 
-                    (log.created_at ? new Date(log.created_at).toLocaleString() : 'N/A');
+                    // Date column
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = log.createDate ? new Date(log.createDate).toLocaleString() : 
+                        (log.created_at ? new Date(log.created_at).toLocaleString() : 'N/A');
                     row.appendChild(dateCell);
-                
-                
-                // User column
-                const userCell = document.createElement('td');
-                userCell.textContent = log.createByName || log.created_by_name || 'N/A';
-                row.appendChild(userCell);
-                
-                // Notes column
-                const notesCell = document.createElement('td');
-                notesCell.innerHTML = log.notes || 'N/A';
-                row.appendChild(notesCell);
-                
-                // Status column
-                const statusCell = document.createElement('td');
-                const status = log.status || log.Status || 'N/A';
-                const badgeClass = status === 'approved' ? 'bg-success' : 
-                                 (status === 'pending' ? 'bg-warning' : 
-                                 (status === 'rejected' ? 'bg-danger' : 'bg-info'));
-                statusCell.innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
-                row.appendChild(statusCell);
-           
-                
-               
                     
-                    tableBody.appendChild(row);
-                });
+                    // User column
+                    const userCell = document.createElement('td');
+                    userCell.textContent = log.createByName || log.created_by_name || 'N/A';
+                    row.appendChild(userCell);
+                    
+                    // Notes column
+                    const notesCell = document.createElement('td');
+                    notesCell.innerHTML = log.notes || 'N/A';
+                    row.appendChild(notesCell);
+                    
+                    // Status column
+                    const statusCell = document.createElement('td');
+                    const status = log.status || log.Status || 'N/A';
+                    const badgeClass = status === 'approved' ? 'bg-success' : 
+                                     (status === 'pending' ? 'bg-warning' : 
+                                     (status === 'rejected' ? 'bg-danger' : 'bg-info'));
+                    statusCell.innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
+                    row.appendChild(statusCell);
+                    
+                    tableBody.appendChild(row); 
+                }); 
+            }); 
+        }
+
+        if (respondModal) {
+            respondModal.addEventListener('show.coreui.modal', function(event) {
+                const button = event.relatedTarget;
+                const requestId = button.dataset.id;
+                const changeableId = button.dataset.changeableId;
+                const category = button.dataset.category;
+
+                console.log('Respond modal opened with:', { requestId, changeableId, category });
+
+                const respondFormNo = document.getElementById('respondFormNo');
+                const respondFormYes = document.getElementById('respondFormYes');
+
+                if (respondFormNo) {
+                    // Set the form action directly
+                    respondFormNo.setAttribute('action', '/rc/' + requestId + '/respond');
+                    document.getElementById('requestChangeIdNo').value = requestId;
+                    document.getElementById('changeableIdNo').value = changeableId;
+                    document.getElementById('categoryNo').value = category;
+                    console.log('Set No form action to:', respondFormNo.getAttribute('action'));
+                    
+                    // Add submit event listener to debug form submission
+                    respondFormNo.addEventListener('submit', function(e) {
+                        console.log('No form submitted with values:', {
+                            requestId: document.getElementById('requestChangeIdNo').value,
+                            changeableId: document.getElementById('changeableIdNo').value,
+                            category: document.getElementById('categoryNo').value,
+                            action: respondFormNo.getAttribute('action')
+                        });
+                    });
+                }
+
+                if (respondFormYes) {
+                    // Set the form action directly
+                    respondFormYes.setAttribute('action', '/rc/' + requestId + '/respond');
+                    document.getElementById('requestChangeIdYes').value = requestId;
+                    document.getElementById('changeableIdYes').value = changeableId;
+                    document.getElementById('categoryYes').value = category;
+                    console.log('Set Yes form action to:', respondFormYes.getAttribute('action'));
+                    
+                    // Add submit event listener to debug form submission
+                    respondFormYes.addEventListener('submit', function(e) {
+                        console.log('Yes form submitted with values:', {
+                            requestId: document.getElementById('requestChangeIdYes').value,
+                            changeableId: document.getElementById('changeableIdYes').value,
+                            category: document.getElementById('categoryYes').value,
+                            action: respondFormYes.getAttribute('action')
+                        });
+                    });
+                }
             });
         }
+
         
         // Helper function to parse log data with multiple strategies
         function parseLogData(logString) {
@@ -466,15 +514,7 @@
             return dateString;
         }
 
-        function getStatusColor(status) {
-            switch(status) {
-                case 'approved': return 'success';
-                case 'pending': return 'warning';
-                case 'rejected': return 'danger';
-                case 'request-revision': return 'info';
-                default: return 'primary';
-            }
-        }
+        const statusColors = @json($statusColors);
     });
 </script>
 @endpush

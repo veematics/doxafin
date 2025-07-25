@@ -116,17 +116,23 @@
                         <div class="card-header">History</div>
                         <div class="card-body">
                             <dd class="col-sm-8">
-                                @if(is_array($requestChange->changes))
+                                @if(is_array($requestChange->changes) && !empty($requestChange->changes))
                                     <ul class="list-unstyled">
                                         @foreach($requestChange->changes as $field => $change)
                                             <li>
                                                 <strong>{{ ucfirst(str_replace('_', ' ', $field)) }}:</strong>
-                                                {{ $change['before'] }} → {{ $change['after'] }}
+                                                @if(is_array($change) && isset($change['before']) && isset($change['after']))
+                                                    {{ $change['before'] }} → {{ $change['after'] }}
+                                                @else
+                                                    {{ is_string($change) ? $change : json_encode($change) }}
+                                                @endif
                                             </li>
                                         @endforeach
                                     </ul>
+                                @elseif($requestChange->changes)
+                                    <pre class="bg-light p-2 rounded">{{ is_string($requestChange->changes) ? $requestChange->changes : json_encode($requestChange->changes, JSON_PRETTY_PRINT) }}</pre>
                                 @else
-                                    {{ $requestChange->changes }}
+                                    <em class="text-muted">No changes recorded</em>
                                 @endif
                             </dd>
                         </div>

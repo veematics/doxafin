@@ -938,7 +938,7 @@
                     </td>
                     <td>
                         <button type="button" class="btn btn-sm btn-danger remove-service" title="Remove ${item}">
-                            <i class="cil-trash"></i>
+                            <svg class="icon"><use xlink:href="{{ asset('assets/icons/free/free.svg#cil-trash') }}"></use></svg>
                         </button>
                     </td>
                  `;

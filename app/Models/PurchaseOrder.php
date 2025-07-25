@@ -18,13 +18,15 @@ class PurchaseOrder extends Model
         'poStartDate',
         'poEndDate',
         'poFiles',
-        'created_by'
+        'created_by',
+        'poLog'
     ];
 
     protected $casts = [
         'poStartDate' => 'date',
         'poEndDate' => 'date',
-        'poFiles' => 'json'
+        'poFiles' => 'json',
+        'poLog' => 'json'
     ];
 
     public static $poStatus = ['Draft', 'Pending', 'Approved', 'Rejected'];
@@ -43,6 +45,18 @@ class PurchaseOrder extends Model
     public function invoices()
     {
         return $this->hasMany(InvoicePo::class, 'invoicepoID');
+    }
+
+    // Add new relationship for notes
+    public function notes()
+    {
+        return $this->hasMany(Note::class, 'notesObjID')->where('notesCategory', 'PurchaseOrder');
+    }
+
+    // Add new relationship for logs
+    public function logs()
+    {
+        return $this->hasMany(Log::class, 'logObjID')->where('logCategory', 'Purchase Order'); // Purchase Order category
     }
 
     // Add method to check if PO can be deleted
